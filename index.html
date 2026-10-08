@@ -1275,17 +1275,24 @@ function basicPayload(){return Object.assign({
   placeData:PLACE_STORE["b-place"]||null
 }, divineFields("b"));}
 function transitPayload(){
-  const tdRaw=val("t-tdate")||new Date().toISOString().slice(0,10);
-  const td=splitDate(tdRaw), tt=splitTime(val("t-ttime"));
+  const now=new Date();
+  const d=splitDate(val("t-tdate")), t=splitTime(val("t-ttime"));
+  // bulletproof transit moment: use what's typed; otherwise fall back to now/noon.
+  const TY=(+d.year>0)?+d.year:now.getFullYear();
+  const TM=(+d.month>0)?+d.month:now.getMonth()+1;
+  const TD=(+d.day>0)?+d.day:now.getDate();
+  const TH=(t.hour!==""&&t.hour!=null)?+t.hour:12;
+  const TMIN=(t.min!==""&&t.min!=null)?+t.min:0;
+  const disp=TY+"/"+pad2(TM)+"/"+pad2(TD);
   return Object.assign({
     firstName:val("t-first"),lastName:val("t-last"),date:val("t-date"),time:val("t-time"),
     unknownTime:document.getElementById("t-notime").checked,place:val("t-place"),
     gender:gender("t-gender"),node:val("t-node"),
     placeData:PLACE_STORE["t-place"]||null,
-    transitDate:tdRaw,transitTime:val("t-ttime"),
-    transit:td, transit_time:tt,
-    transit_day:td.day, transit_month:td.month, transit_year:td.year,
-    transit_hour:(tt.hour==null?12:tt.hour), transit_min:(tt.min||0), transit_sec:0
+    transitDate:disp,transitTime:val("t-ttime"),
+    transit:{year:TY,month:TM,day:TD}, transit_time:{hour:TH,min:TMIN},
+    transit_day:TD, transit_month:TM, transit_year:TY,
+    transit_hour:TH, transit_min:TMIN, transit_sec:0
   }, divineFields("t"));
 }
 
