@@ -14,7 +14,9 @@ export function cleanToken(t){
 }
 export const PASS = ["full_name","day","month","year","hour","min","sec",
   "gender","place","lat","lon","tzone","lan","house_system","node_type",
-  "transit_day","transit_month","transit_year","transit_hour","transit_min","transit_sec"];
+  "transit_day","transit_month","transit_year","transit_hour","transit_min","transit_sec",
+  "transit_place","transit_lat","transit_lon","transit_tzone","transit_planet",
+  "aspect_orbs_type","aspect_orbs_value","aspects_type"];
 
 export async function forward(ENV, url, body){
   const form = new FormData();
