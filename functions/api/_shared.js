@@ -24,6 +24,9 @@ export async function forward(ENV, url, body){
   for (const k of PASS) if (body[k]!==undefined && body[k]!==null && body[k]!=="") form.set(k, String(body[k]));
   const token = cleanToken(ENV.DIVINE_TOKEN);
   const headers = {}; if (token) headers["Authorization"] = "Bearer " + token;
+  // present the authorized website so DivineAPI's chart/image endpoints accept server-side calls
+  const site = (ENV.DIVINE_SITE_URL || "https://zendiac-texing-page1.pages.dev").trim();
+  if (site) { headers["Referer"] = site; headers["Origin"] = site; }
   const r = await fetch(url, { method:"POST", headers, body: form });
   const text = await r.text();
   return cors(r.status, text);
