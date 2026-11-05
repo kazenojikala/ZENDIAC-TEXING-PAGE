@@ -1,0 +1,8 @@
+# Cloudflare Pages 路径重写:让干净网址指向同一套代码(浏览器地址栏保持 /choose 等)
+# 状态码 200 = 重写(不是跳转),所以地址栏不会变回带 ? 的网址。
+/choose     /index.html   200
+/choose/    /index.html   200
+/basic      /index.html   200
+/basic/     /index.html   200
+/transit    /index.html   200
+/transit/   /index.html   200
