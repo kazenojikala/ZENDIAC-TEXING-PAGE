@@ -4,6 +4,32 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Your Astrological Path</title>
+<!-- ZENDIAC analytics (GA4) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BLHWQ2N062"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){ dataLayer.push(arguments); }
+gtag('js', new Date());
+(function(){
+  var cfg = {};
+  var framed = false;
+  try { framed = window.self !== window.top; } catch(e){ framed = true; }
+  if (framed) {
+    try {
+      // same-site wrapper pages (/basic, /choose, /transit): report the address the visitor actually sees
+      cfg.page_location = window.top.location.href;
+      cfg.page_referrer = window.top.document.referrer;
+    } catch(e) {
+      // embedded inside another site's page (e.g. the store): that page already counts the page view
+      cfg.send_page_view = false;
+    }
+  }
+  gtag('config', 'G-BLHWQ2N062', cfg);
+})();
+// zTrack(name, params): send one GA4 event; never throws, so tracking can't break the reading
+function zTrack(name, params){ try { gtag('event', name, params || {}); } catch(e){} }
+function zVia(){ try { return /[?&]read=1(&|$)/.test(location.search) ? 'email_link' : 'form'; } catch(e){ return 'form'; } }
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -1457,6 +1483,7 @@ async function runBasic(){
   if(!CONFIG.demoMode && !(p.firstName||p.lastName)){ toast("Add your name to continue."); return; }
   if(!CONFIG.demoMode && !p.date){ toast("Add your birth date to continue."); return; }
   if(!CONFIG.demoMode && !(p.placeData&&p.placeData.lat!=null)){ toast("Pick your birth place from the dropdown so we get the exact coordinates."); return; }
+  zTrack("reading_start",{module:"basic",via:zVia()});
   const btn=document.getElementById("basic-go"); btn.disabled=true; btn.textContent="Reading the sky…";
   try{
     const arr=await fetchNatal(p);
@@ -1464,10 +1491,11 @@ async function runBasic(){
     const rd=document.getElementById("reading"); rd.style.display="block";
     rd.classList.remove("result-appear"); void rd.offsetWidth; rd.classList.add("result-appear");
     initReading(arr, meta, !p.unknownTime, p);
+    if(arr&&arr.length) zTrack("reading_complete",{module:"basic",via:zVia()}); else zTrack("reading_error",{module:"basic",reason:"empty_result"});
     if(CONFIG.debugRaw) showRaw("basic-results", window.__rawNatal);
     rd.scrollIntoView({behavior:"smooth"});
   }
-  catch(e){ toast("Couldn't reach the chart service. Check your proxy and try again."); }
+  catch(e){ zTrack("reading_error",{module:"basic",reason:"request_failed"}); toast("Couldn't reach the chart service. Check your proxy and try again."); }
   btn.disabled=false; btn.textContent="Reveal my placements";
 }
 function renderPlacements(list, hasTime){
@@ -1496,6 +1524,7 @@ async function runTransit(){
   if(!CONFIG.demoMode && !(p.firstName||p.lastName)){ toast("Add your name to continue."); return; }
   if(!CONFIG.demoMode && !p.date){ toast("Add your birth date first (or pull it from Part One)."); return; }
   if(!CONFIG.demoMode && !(p.placeData&&p.placeData.lat!=null)){ toast("Pick your birth place from the dropdown so we get the exact coordinates."); return; }
+  zTrack("reading_start",{module:"transit",via:"form"});
   const btn=document.getElementById("transit-go"); btn.disabled=true; btn.textContent="Reading the sky…";
   try{
     const [list, wheel, natal] = await Promise.all([
@@ -1505,9 +1534,10 @@ async function runTransit(){
     ]);
     const meta={ name:(p.firstName+" "+p.lastName).trim()||"—", dob:p.date||"—", time:(p.unknownTime?"—":(p.time||"—")), place:p.place||"—" };
     renderTransits(list, p.transitDate, {wheel, natal, meta, payload:p});
+    if(list&&list.length) zTrack("reading_complete",{module:"transit",via:"form"}); else zTrack("reading_error",{module:"transit",reason:"empty_result"});
     if(CONFIG.debugRaw){ showRaw("transit-results", window.__rawTransit); if(window.__rawTransitWheel) showRaw("transit-results", window.__rawTransitWheel); }
   }
-  catch(e){ toast("Couldn't reach the transit service. Check your proxy and try again."); }
+  catch(e){ zTrack("reading_error",{module:"transit",reason:"request_failed"}); toast("Couldn't reach the transit service. Check your proxy and try again."); }
   btn.disabled=false; btn.textContent="Reveal my transits";
 }
 const TMON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -1759,6 +1789,7 @@ function R_showPanel(i){
   R_buildMenu();
   R_$('R-navCenter').classList.remove('menu-open');
   R_revealPanel(newP);
+  zTrack("reading_panel",{panel_index:ni+1,panel_name:newP.dataset.name||""});
 }
 function R_revealPanel(panel){
   // ordered fade-in of the panel's top-level blocks, then any table rows quickly
@@ -2046,7 +2077,7 @@ async function R_submitEmail(){
   btn.disabled=true; const bt=btn.textContent; btn.textContent="Sending…"; msg.textContent="";
   try{
     const res=await fetch((CONFIG.proxyBase||"")+"/subscribe",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:email,link:link,name:name})});
-    if(res.ok){ msg.textContent="Done — check your inbox for the link to your reading."; msg.className="ec-msg ok"; if(input)input.value=""; }
+    if(res.ok){ zTrack("email_signup",{method:"reading"}); msg.textContent="Done — check your inbox for the link to your reading."; msg.className="ec-msg ok"; if(input)input.value=""; }
     else { const tx=await res.text().catch(()=>''); msg.textContent=(typeof CONFIG!=='undefined'&&CONFIG.debugRaw)?("Error: "+tx):"Something went wrong — please try again."; msg.className="ec-msg err"; }
   }catch(e){ msg.textContent="Couldn't reach the service — please try again."; msg.className="ec-msg err"; }
   btn.disabled=false; btn.textContent=bt;
@@ -2326,7 +2357,8 @@ function cmLookupHouse(planet, house){ return cmItems((_cm().house||{})[_np(plan
 function cmLookupTransit(natal, transit, aspect){ return cmItems((_cm().transit||{})[_np(natal)+"_"+_np(transit)+"_"+_hc(aspect)]); }
 function cmOpen(items, label, kindWord){
   if(!items||!items.length) return;
-  if(items.length===1){ window.open(items[0].url, "_blank", "noopener"); return; }
+  if(items.length===1){ zTrack("crystal_click",{stone:items[0].en,placement:label||"",kind:kindWord||"placement",choices:1}); window.open(items[0].url, "_blank", "noopener"); return; }
+  zTrack("crystal_choice_open",{placement:label||"",kind:kindWord||"placement",choices:items.length});
   cmShowPopup(items, label, kindWord);
 }
 function cmShowPopup(items, label, kindWord){
@@ -2337,7 +2369,7 @@ function cmShowPopup(items, label, kindWord){
     ? ("For "+label+" — choose a stone and visit its product page to learn what this "+what+" means.")
     : ("Choose a stone and visit its product page to learn what it means.");
   list.innerHTML = items.map(function(x){
-    return '<a class="xtal-item" href="'+x.url+'" target="_blank" rel="noopener" onclick="cmClosePopup()">'
+    return '<a class="xtal-item" href="'+x.url+'" target="_blank" rel="noopener" onclick="zTrack(\'crystal_click\',{stone:this.getAttribute(\'data-stone\'),placement:\''+String(label||"").replace(/['"\\<>]/g,"")+'\',kind:\''+what+'\',choices:'+items.length+'});cmClosePopup()" data-stone="'+String(x.en).replace(/"/g,"&quot;")+'">'
       +'<span class="xi-name">'+x.en+'</span>'
       +'<span class="xi-arw">&#8594;</span></a>';
   }).join("");

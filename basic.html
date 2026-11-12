@@ -10,6 +10,13 @@
 </style>
 </head>
 <body>
-<iframe id="app" src="/?start=basic" title="Your Astrological Path" allow="clipboard-write"></iframe>
+<iframe id="app" title="Your Astrological Path" allow="clipboard-write"></iframe>
+<script>
+(function(){
+  var qs = (location.search || "").replace(/^\?/, "");
+  document.getElementById("app").src = "/?start=basic" + (qs ? "&" + qs : "");
+})();
+</script>
+<noscript><iframe src="/?start=basic" title="Your Astrological Path" style="position:fixed;inset:0;width:100%;height:100%;border:0"></iframe></noscript>
 </body>
 </html>
