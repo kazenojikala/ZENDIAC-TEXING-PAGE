@@ -680,8 +680,8 @@ body.entry-basic .replay{display:none}
 #natal-basic .field label.notime{font-size:13.5px;letter-spacing:0;text-transform:none;color:var(--body);
   min-height:44px;margin-top:0;gap:11px}
 #natal-basic .notime input{width:19px;height:19px;flex:0 0 auto}
-.field-hint{font-size:12.5px;color:var(--label);line-height:1.5;margin-top:-4px;display:none}
-#bf-time.is-unknown .field-hint{display:block}
+.field-hint{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:-2px}
+#natal-basic .module-head{border-bottom:none;padding-bottom:0;margin-bottom:26px}
 .field-err{font-size:13px;color:var(--req);line-height:1.45;display:none}
 .field.has-err .field-err{display:block}
 .field.has-err input[type=text],.field.has-err .sel{border-color:var(--req)}
@@ -729,15 +729,20 @@ body.chart-on .site-foot{display:block}
 #reading .soft-fail p{font-family:var(--serif);font-style:italic;font-size:16px;color:var(--label);margin:0 0 14px}
 #reading .soft-fail .chip{font-size:11px;letter-spacing:.14em;text-transform:uppercase;padding:12px 20px;min-height:44px}
 @media(max-width:600px){
-  body.entry-basic .wrap{padding-top:20px}
-  .brandbar{font-size:17px;margin-bottom:16px}
-  .module#natal-basic{padding:22px 20px 26px}
-  #natal-basic .module-head{padding-bottom:18px;margin-bottom:20px}
-  #natal-basic .module-head h2{font-size:25px}
-  #natal-basic .module-sub{margin-top:10px;line-height:1.55}
-  #natal-basic .covers{margin-top:14px}
-  #natal-basic .form-grid{gap:16px}
-  #natal-basic .go{margin-top:22px}
+  body.entry-basic .wrap{padding-top:26px}
+  .brandbar{font-size:17px;margin-bottom:30px}
+  /* phones: no card frame around the form, so the fields get the full width and room to breathe */
+  .module#natal-basic{border:none;background:transparent;padding:0 4px;margin-bottom:14px}
+  #natal-basic .module-head{margin-bottom:30px}
+  #natal-basic .module-head h2{font-size:28px}
+  #natal-basic .form-grid{gap:26px}
+  #natal-basic .field{gap:10px}
+  .sel-row{gap:10px}
+  #natal-basic .field input[type=text],#natal-basic .sel{min-height:52px}
+  #natal-basic .field label.notime{margin-top:2px}
+  #natal-basic .go{margin-top:34px;min-height:54px}
+  .form-privacy{margin-top:18px}
+  .err-card{padding:26px 20px}
 }
 
 </style>
@@ -766,8 +771,6 @@ body.chart-on .site-foot{display:block}
     <section class="module" id="natal-basic">
       <div class="module-head">
         <h2>Your free birth chart reading</h2>
-        <p class="module-sub">See your Sun, Moon, and Rising signs — and what each placement means.</p>
-        <div class="covers"><span class="cover-pill">Free</span><span class="cover-pill">No sign-up</span><span class="cover-pill">About a minute</span></div>
       </div>
       <div class="form-grid">
         <div class="field" id="bf-date"><label id="bl-date">Date of birth</label>
@@ -788,13 +791,12 @@ body.chart-on .site-foot{display:block}
           <input id="b-time" type="hidden">
           <div class="field-err" id="be-time" role="alert"></div>
           <label class="notime"><input id="b-notime" type="checkbox"> I don't know my birth time</label>
-          <div class="field-hint" id="b-notime-hint">That's fine — your reading will cover your signs. Rising sign and houses need a birth time.</div>
         </div>
         <div class="field full" id="bf-place"><label for="b-place">Birth place</label><input id="b-place" class="acplace" type="text" placeholder="City or town" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="done">
           <div class="field-err" id="be-place" role="alert"></div></div>
       </div>
       <button class="go" id="basic-go" onclick="runBasic()">Get my free reading</button>
-      <p class="form-privacy">Your birth details are used only to calculate your chart. <a href="https://privacy.zendiac.us/" target="_blank" rel="noopener">Privacy Policy</a></p>
+      <p class="form-privacy">No sign-up &nbsp;·&nbsp; About a minute &nbsp;·&nbsp; <a href="https://privacy.zendiac.us/" target="_blank" rel="noopener">Privacy Policy</a></p>
       <div class="err-card" id="basic-error" style="display:none">
         <div class="err-h">We couldn't draw your chart just now</div>
         <p class="err-p">Your details came through, but the chart service didn't answer this time. Nothing is wrong on your side.</p>
@@ -2550,7 +2552,7 @@ async function R_loadChart(){
   }
   hh.appendChild(opt("","Hour")); for(let k=1;k<=12;k++) hh.appendChild(opt(k,k));
   mm.appendChild(opt("","Min")); for(let k=0;k<60;k++) mm.appendChild(opt(pad2(k),pad2(k)));
-  ap.appendChild(opt("","AM / PM")); ap.appendChild(opt("AM","AM")); ap.appendChild(opt("PM","PM"));
+  ap.appendChild(opt("","AM/PM")); ap.appendChild(opt("AM","AM")); ap.appendChild(opt("PM","PM"));
   function syncTime(){
     if(nt&&nt.checked){ $("b-time").value=""; mark(); return; }
     if(hh.value && mm.value==="") mm.value="00";
