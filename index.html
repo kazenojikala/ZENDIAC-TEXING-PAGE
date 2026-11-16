@@ -882,6 +882,35 @@ body.has-stepper .wrap{padding-bottom:120px}
 #reading .acc.open .acc-teaser{display:none}
 #reading .acc .acc-caret{margin-top:2px}
 #reading .acc.open .acc-caret{margin-top:8px}
+#reading .sec-next{flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:baseline;gap:6px 12px;border:none;border-top:1px solid var(--line-faint);
+  box-shadow:none;margin:40px 0 0;padding:22px 6px 8px}
+#reading .sec-next:hover{background:none;box-shadow:none}
+#reading .sec-next .sn-k{font-size:10px;color:var(--gold-deep)}
+#reading .sec-next .sn-t{font-size:20px;font-weight:400;color:var(--body);transition:color .25s}
+#reading .sec-next:hover .sn-t{color:var(--ink)}
+#reading .sec-next .pn-arrow{font-size:20px;margin-left:8px}
+#reading .end-row{display:flex;align-items:center;justify-content:space-between;gap:20px 40px;flex-wrap:wrap;margin:56px 0 6px;
+  padding-top:26px;border-top:1px solid var(--line-faint)}
+#reading .email-capture.ec-slim{flex:1 1 300px;min-width:0;max-width:400px;margin:0;padding:0;border:none;background:none;text-align:left}
+#reading .ec-slim .ec-form{flex-wrap:nowrap;gap:16px;margin:0;justify-content:flex-start}
+#reading .ec-slim .ec-form input{flex:1 1 0;width:0;min-width:0;text-align:left;font-family:var(--sans);font-size:16px;padding:10px 2px;min-height:44px}
+#reading .ec-slim .ec-form input::placeholder{font-style:normal}
+#reading .ec-slim .ec-form button{min-height:44px;padding:6px 1px}
+#reading .ec-slim .ec-msg{margin-top:8px;min-height:0}
+#reading .ec-slim .ec-msg:empty{display:none}
+#reading .adv-card{flex:0 0 auto;display:flex;align-items:baseline;gap:12px;background:none;border:none;padding:10px 0;min-height:44px;cursor:pointer;text-align:left}
+#reading .adv-k{font-family:var(--sans);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold-deep)}
+#reading .adv-t{font-family:var(--serif);font-size:22px;font-weight:400;line-height:1.15;color:var(--gold);transition:text-shadow .25s}
+#reading .adv-card:hover .adv-t{text-shadow:0 0 14px rgba(212,175,55,.45)}
+#reading .adv-arw{font-size:20px;margin-left:6px;color:var(--gold-mute)}
+#reading .end-row{border-top:none;padding-top:0;margin-top:52px;flex-direction:column;flex-wrap:nowrap;align-items:center;gap:44px}
+#reading #R-secNext{order:-1;width:100%;max-width:440px;margin:0;padding:15px 16px;border:1px solid var(--line);flex-direction:row;flex-wrap:nowrap;
+  justify-content:center;align-items:center;gap:10px;transition:border-color .25s,color .25s;
+  font-family:var(--sans);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--label)}
+#reading #R-secNext:hover{border-color:var(--gold-deep);color:var(--ink)}
+#reading #R-secNext .sn-k,#reading #R-secNext .sn-t,#reading #R-secNext .pn-arrow{font:inherit;letter-spacing:inherit;color:inherit;margin:0}
+#reading .email-capture.ec-slim{flex:0 0 auto;width:100%;max-width:440px}
+@media (max-width:700px){ #reading .ec-slim .ec-form{gap:12px} #reading .ec-slim .ec-form button{font-size:10.5px;letter-spacing:.1em} #reading .email-capture.ec-slim{max-width:none;flex-basis:100%} }
 .cz-scroll{overflow:hidden;display:flex;align-items:center;justify-content:center}
 .cz-inner{width:min(calc(100vw - 16px), calc(100vh - 20px));width:min(calc(100vw - 16px), calc(100dvh - 20px));max-width:none;margin:0;padding:0}
 .cz-hint{display:none}
@@ -1053,18 +1082,17 @@ body.has-stepper .wrap{padding-bottom:120px}
     </div>
   </div>
 
-  <!-- EMAIL CAPTURE -->
-  <div id="R-email" class="email-capture">
-    <div class="ec-title">Keep your reading</div>
-    <div class="ec-sub">Enter your email and we'll send you a private link to revisit this reading anytime.</div>
-    <div class="ec-form">
-      <input id="R-email-input" type="email" placeholder="your@email.com" autocomplete="email">
-      <button id="R-email-btn" onclick="R_submitEmail()">Email me my reading</button>
+  <!-- EMAIL + ADVANCED (transits) -->
+  <div class="end-row">
+    <div id="R-email" class="email-capture ec-slim">
+      <div class="ec-form">
+        <input id="R-email-input" type="email" inputmode="email" placeholder="your@email.com" autocomplete="email" aria-label="Email address">
+        <button id="R-email-btn" onclick="R_submitEmail()">Email my reading</button>
+      </div>
+      <div id="R-email-msg" class="ec-msg"></div>
     </div>
-    <label class="ec-consent"><input id="R-email-consent" type="checkbox"> Email me my reading and occasional guidance &amp; offers from ZENDIAC. You can unsubscribe anytime.</label>
-    <div id="R-email-msg" class="ec-msg"></div>
+    <button class="sec-next" id="R-secNext" type="button" onclick="R_stepGo(1)"><span class="sn-k">Next:</span><span class="sn-t" id="R-secNextT"></span><span class="pn-arrow">›</span></button>
   </div>
-  <button class="crosslink r-crosslink" onclick="goToModule('transit')">Continue to your natal transit <span class="cl-arw">→</span></button>
   </div><!-- /below -->
 
   <!-- guided intro modal -->
@@ -2236,6 +2264,7 @@ function R_updateStepper(){
   const st=R_$('R-navStep'); if(st) st.textContent="Section "+(i+1)+" of "+n;
   const c=R_$('R-stCount'); if(c) c.innerHTML=(i+1)+" / "+n+'<span class="st-name">  ·  '+R_esc(R_panels[i].dataset.name||"")+'</span>';
   const pv=R_$('R-stPrev'); if(pv) pv.classList.toggle('st-hide', i===0);
+  const sn=R_$('R-secNext'); if(sn){ const end=(i>=n-1); sn.style.display=end?'none':''; if(!end) R_$('R-secNextT').textContent=R_NEXT[R_panels[i+1].dataset.name]||R_panels[i+1].dataset.name||""; }
   const nx=R_$('R-stNext'); if(nx){ const last=(i>=n-1); nx.classList.toggle('st-hide', last); nx.textContent= last ? "" : ((R_panels[i+1].dataset.name||"Next")+" ›"); }
   const bar=R_$('R-stepper'); if(bar) bar.style.setProperty('--st-p', Math.round((i+1)/n*100)+'%');
 }
@@ -2272,6 +2301,13 @@ function R_bodyHTML(t, cls){
       : `<p class="${cls}"><span class="lead-s">${R_esc(x)}</span></p>`;
   }).join('');
 }
+/* end-of-section line: says what the next section adds, so there is a reason to keep going */
+const R_NEXT={
+  "Personality":"How you come across",
+  "Natal Insights":"What your chart is made of",
+  "Sign Placements":"Your planets, sign by sign",
+  "House Placements":"Where it all plays out"
+};
 function R_teaser(t){ const ss=R_splitSentences(t); return ss.length?ss[0]:""; }
 /* Personality: when the reader scrolls down to the next collapsed heading, it opens by itself.
    Sections already read are left open on purpose: collapsing text above the reader would make the page jump. */
@@ -2562,14 +2598,6 @@ function initReading(dataArr, meta, hasTime, payload){
   allPanels.forEach(p=>{ p.classList.remove('show','p-in','p-out'); const old=p.querySelector('.panel-next'); if(old) old.remove(); });
   R_panels=allPanels.filter(p=>R_hasTime || !p.hasAttribute('data-needs-time'));
   R_idx=0;
-  // end-of-section button: "Continue to section 2 / Personality" (same call as the stepper, so reading_panel fires as before)
-  R_panels.forEach((p,k)=>{
-    if(k===R_panels.length-1) return;
-    const b=document.createElement('button'); b.type='button'; b.className='panel-next sec-next';
-    b.innerHTML=`<span class="sn-k">Continue to section ${k+2}</span><span class="sn-t">${R_panels[k+1].dataset.name||""}<span class="pn-arrow">›</span></span>`;
-    b.onclick=()=>R_stepGo(1);
-    p.appendChild(b);
-  });
   R_initStepper();
 
   // ---- big three ----
