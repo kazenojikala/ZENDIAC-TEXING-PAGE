@@ -668,7 +668,6 @@ h2{font-family:var(--serif);font-weight:300;font-size:30px;line-height:1.15;colo
   <!-- GUIDED, CONVERSATIONAL INTRO -->
   <section class="intro" id="intro">
     <div class="topbar"><span class="demo-badge" id="demo-badge">Preview · sample data</span></div>
-    <div class="lead-eyebrow">Begin here</div>
     <div class="conversation" id="conversation"></div>
     <button class="skip" id="skip" onclick="skipToChoice()">Skip — jump to where I begin →</button>
   </section>
@@ -1480,7 +1479,6 @@ function transitPayload(){
 
 async function runBasic(){
   const p=basicPayload();
-  if(!CONFIG.demoMode && !(p.firstName||p.lastName)){ toast("Add your name to continue."); return; }
   if(!CONFIG.demoMode && !p.date){ toast("Add your birth date to continue."); return; }
   if(!CONFIG.demoMode && !(p.placeData&&p.placeData.lat!=null)){ toast("Pick your birth place from the dropdown so we get the exact coordinates."); return; }
   zTrack("reading_start",{module:"basic",via:zVia()});
@@ -1521,7 +1519,6 @@ function renderPlacements(list, hasTime){
 
 async function runTransit(){
   const p=transitPayload();
-  if(!CONFIG.demoMode && !(p.firstName||p.lastName)){ toast("Add your name to continue."); return; }
   if(!CONFIG.demoMode && !p.date){ toast("Add your birth date first (or pull it from Part One)."); return; }
   if(!CONFIG.demoMode && !(p.placeData&&p.placeData.lat!=null)){ toast("Pick your birth place from the dropdown so we get the exact coordinates."); return; }
   zTrack("reading_start",{module:"transit",via:"form"});
