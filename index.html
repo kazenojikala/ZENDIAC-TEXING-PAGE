@@ -848,6 +848,41 @@ body.chart-on .site-foot{display:block}
 body.has-stepper .wrap{padding-bottom:150px}
 @media (prefers-reduced-motion:reduce){ .stepper.st-fixed{transition:none} }
 
+/* ===== batch 2b ===== */
+/* slim progress bar: a thin line + one row of quiet text, instead of boxed buttons */
+.stepper{display:none}
+.stepper.st-fixed{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0;align-items:center;justify-content:center;gap:0;
+  height:calc(44px + env(safe-area-inset-bottom));padding:0 10px env(safe-area-inset-bottom);
+  background:rgba(5,5,5,.96);border-top:1px solid var(--line-soft);transform:translateY(110%);transition:transform .3s ease}
+.stepper.st-fixed::before{content:"";position:absolute;left:0;top:-1px;height:1px;width:var(--st-p,0%);background:var(--gold-deep);transition:width .5s ease}
+.stepper.st-fixed .st-row{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:660px}
+.stepper.st-fixed .st-btn{border:none;min-height:44px;min-width:0;max-width:none;padding:0 8px;font-size:10.5px;letter-spacing:.16em;color:var(--label);flex:0 1 auto;white-space:nowrap}
+.stepper.st-fixed .st-next{color:var(--gold-mute);text-align:right}
+.stepper.st-fixed .st-btn:hover{color:var(--gold)}
+.stepper.st-fixed .st-count{font-family:var(--sans);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:0 6px;
+  overflow:hidden;text-overflow:ellipsis}
+@media (max-width:600px){ .stepper.st-fixed .st-name{display:none} }
+body.has-stepper .wrap{padding-bottom:120px}
+/* desktop landing: the form sits in the middle of the window instead of at the very top */
+@media (min-width:601px){
+  body.entry-basic:not(.reading-on) #chart-area{padding-top:max(0px, calc(50vh - 330px))}
+}
+/* desktop: narrower reading column and slightly larger text, so lines are a comfortable length */
+@media (min-width:760px){
+  #reading #R-below{max-width:660px;margin-left:auto;margin-right:auto}
+  #reading .pers-p,#reading .d-p,#reading .bal-p{font-size:18px}
+}
+/* first sentence of each passage stands out as the takeaway */
+#reading .lead-s{display:block;color:var(--ink);font-size:1.17em;line-height:1.45;margin-bottom:9px}
+/* collapsed sections show a one-line preview */
+#reading .acc .acc-h{align-items:flex-start}
+#reading .acc-l{display:flex;flex-direction:column;gap:8px;min-width:0;flex:1 1 auto}
+#reading .acc-teaser{font-family:var(--serif);font-size:16px;letter-spacing:0;text-transform:none;color:var(--muted);line-height:1.4;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity .3s ease}
+#reading .acc.open .acc-teaser{display:none}
+#reading .acc .acc-caret{margin-top:2px}
+#reading .acc.open .acc-caret{margin-top:8px}
+
 </style>
 <!-- Route A: offline timezone lookup (lat/lon -> IANA zone), free & keyless.
      Used only in LIVE mode to derive DivineAPI's tzone from Photon's coordinates.
@@ -1009,9 +1044,11 @@ body.has-stepper .wrap{padding-bottom:150px}
   </section>
 
   <div class="stepper" id="R-stepper" role="navigation" aria-label="Reading sections">
-    <button class="st-btn st-prev" id="R-stPrev" onclick="R_stepGo(-1)">‹ Back</button>
-    <span class="st-count" id="R-stCount"></span>
-    <button class="st-btn st-next" id="R-stNext" onclick="R_stepGo(1)"></button>
+    <div class="st-row">
+      <button class="st-btn st-prev" id="R-stPrev" onclick="R_stepGo(-1)">‹ Back</button>
+      <span class="st-count" id="R-stCount"></span>
+      <button class="st-btn st-next" id="R-stNext" onclick="R_stepGo(1)"></button>
+    </div>
   </div>
 
   <!-- EMAIL CAPTURE -->
@@ -1815,6 +1852,7 @@ async function runBasic(){
       const meta={ name:(p.firstName+" "+p.lastName).trim(), dob:p.date, time:p.time, place:p.place };
       const rd=document.getElementById("reading"); rd.style.display="block";
       rd.classList.remove("result-appear"); void rd.offsetWidth; rd.classList.add("result-appear");
+      document.body.classList.add("reading-on");
       const mod=document.getElementById("natal-basic"); mod.classList.add("has-reading"); mod.classList.remove("editing");
       document.getElementById("b-summary-text").textContent=[B_fmtDate(p.date), hasTime?B_fmtTime(p.time):"Birth time not provided", p.place].filter(Boolean).join("  ·  ");
       initReading(arr, meta, hasTime, p);
@@ -2188,14 +2226,16 @@ function R_step(dir){ R_showPanel(R_idx+dir); }
 /* stepper: Back / "2 / 5" / Next. Uses the same R_showPanel call as before, so reading_panel fires exactly as it did. */
 function R_stepGo(dir){
   const k=R_idx+dir; if(k<0 || k>=R_panels.length) return;
+  R_accHold=Date.now()+1500;
   R_showPanel(k); R_scrollNav();
 }
 function R_updateStepper(){
   const n=R_panels.length, i=R_idx;
   const st=R_$('R-navStep'); if(st) st.textContent="Section "+(i+1)+" of "+n;
-  const c=R_$('R-stCount'); if(c) c.textContent=(i+1)+" / "+n;
+  const c=R_$('R-stCount'); if(c) c.innerHTML=(i+1)+" / "+n+'<span class="st-name">  ·  '+R_esc(R_panels[i].dataset.name||"")+'</span>';
   const pv=R_$('R-stPrev'); if(pv) pv.classList.toggle('st-hide', i===0);
-  const nx=R_$('R-stNext'); if(nx){ const last=(i>=n-1); nx.classList.toggle('st-hide', last); nx.textContent= last ? "" : ("Next: "+(R_panels[i+1].dataset.name||"")+" ›"); }
+  const nx=R_$('R-stNext'); if(nx){ const last=(i>=n-1); nx.classList.toggle('st-hide', last); nx.textContent= last ? "" : ((R_panels[i+1].dataset.name||"Next")+" ›"); }
+  const bar=R_$('R-stepper'); if(bar) bar.style.setProperty('--st-p', Math.round((i+1)/n*100)+'%');
 }
 /* fixed to the bottom of the screen on a normal page; when the page is embedded in an auto-height frame
    (taller than the screen) a fixed bar would sit at the very end, so it stays in the flow instead */
@@ -2218,7 +2258,42 @@ function R_acc(btn){
   const sec=btn.closest('.acc'); if(!sec) return;
   const open=!sec.classList.contains('open');
   sec.classList.toggle('open', open); btn.setAttribute('aria-expanded', open?'true':'false');
+  if(!open) sec.dataset.userClosed="1";   // closed by hand: don't reopen it automatically
 }
+/* passage text: the first sentence is set apart as the takeaway, the rest follows as normal paragraphs */
+function R_bodyHTML(t, cls){
+  return R_paragraphs(t).map((x,i)=>{
+    if(i>0) return `<p class="${cls}">${R_esc(x)}</p>`;
+    const ss=R_splitSentences(x);
+    return ss.length>1
+      ? `<p class="${cls}"><span class="lead-s">${R_esc(ss[0])}</span>${R_esc(ss.slice(1).join(' '))}</p>`
+      : `<p class="${cls}"><span class="lead-s">${R_esc(x)}</span></p>`;
+  }).join('');
+}
+function R_teaser(t){ const ss=R_splitSentences(t); return ss.length?ss[0]:""; }
+/* Personality: when the reader scrolls down to the next collapsed heading, it opens by itself.
+   Sections already read are left open on purpose: collapsing text above the reader would make the page jump. */
+let R_accY=0, R_accTick=false, R_accHold=0;
+function R_accAuto(){
+  R_accTick=false;
+  const y=window.scrollY, down=y>R_accY+2; R_accY=y; if(!down) return;
+  if(Date.now()<R_accHold) return;            // the page is moving by itself (section change) or a section has just opened
+  const host=R_$('R-pers-body'); if(!host || !host.offsetParent) return;
+  const secs=[...host.querySelectorAll('.acc')];
+  for(let i=1;i<secs.length;i++){
+    const sc=secs[i];
+    if(sc.classList.contains('open') || sc.dataset.userClosed || sc.dataset.auto) continue;
+    if(!secs[i-1].classList.contains('open')) return;                 // the reader skipped the one before: leave the rest to them
+    const top=sc.getBoundingClientRect().top;
+    if(top > 0 && top < window.innerHeight*0.58){
+      R_accHold=Date.now()+700;
+      sc.dataset.auto="1"; sc.classList.add('open');
+      const h=sc.querySelector('.acc-h'); if(h) h.setAttribute('aria-expanded','true');
+    }
+    return;                                                            // one at a time
+  }
+}
+window.addEventListener('scroll', ()=>{ if(!R_accTick){ R_accTick=true; requestAnimationFrame(R_accAuto); } }, {passive:true});
 /* chart: enlarge */
 function R_zoomOpen(){
   const src=document.querySelector('#R-chartSlot .chart-in'); const ov=R_$('chartZoom'), host=R_$('chartZoomInner');
@@ -2260,7 +2335,7 @@ function R_buildMenu(){
   const cols=groups.map(col=>`<div class="nav-col"><div class="nav-group-h">${col.g}</div>${col.items.join("")}</div>`).join("");
   R_$('R-navMenu').innerHTML=`<div class="nav-cols">${cols}</div>`;
 }
-function R_navpick(k){ R_showPanel(k); }
+function R_navpick(k){ R_accHold=Date.now()+1500; R_showPanel(k); }
 function R_scrollNav(){ requestAnimationFrame(()=>{ const nb=R_$('R-navbar'); const y=nb.getBoundingClientRect().top+window.scrollY-26; window.scrollTo({top:y,behavior:'smooth'}); }); }
 
 /* ---- guided intro modal ---- */
@@ -2382,7 +2457,7 @@ function R_select(pickerId,detailId,kind,i){
       const sections=R_parseReport(d);
       if(sections){
         bodyEl.innerHTML=sections.map(([h,t])=>
-          `<div class="d-sec"><div class="d-h">${R_esc(h)}</div>${R_paragraphs(t).map(x=>`<p class="d-p">${R_esc(x)}</p>`).join('')}</div>`
+          `<div class="d-sec"><div class="d-h">${R_esc(h)}</div>${R_bodyHTML(t,'d-p')}</div>`
         ).join("")+cta;
         R_animDetailBody(bodyEl);
       } else { bodyEl.innerHTML=R_rawBox(d,retry)+cta; }
@@ -2566,8 +2641,8 @@ async function R_loadPersonality(){
       R_$('R-pers-deg').textContent=R_deg(a.longitude||"");
       const po=[["Personality","personality"],["Career","career"],["Health","health"],["Finance","finance"],["Relationships","relationships"]];
       R_$('R-pers-body').innerHTML=po.filter(([l,k])=>a.analysis[k]).map(([l,k],i)=>
-        `<div class="pers-sec acc${i===0?' open':''}"><button type="button" class="pers-h acc-h" aria-expanded="${i===0}" onclick="R_acc(this)"><span>${l}</span><span class="acc-caret"></span></button>`+
-        `<div class="acc-body"><div class="acc-in">${k==="health"?'<p class="pers-note">Offered for reflection only — not medical or health advice.</p>':''}${R_paragraphs(a.analysis[k]).map(x=>`<p class="pers-p">${R_esc(x)}</p>`).join('')}</div></div></div>`
+        `<div class="pers-sec acc${i===0?' open':''}"><button type="button" class="pers-h acc-h" aria-expanded="${i===0}" onclick="R_acc(this)"><span class="acc-l"><span>${l}</span><span class="acc-teaser">${R_esc(R_teaser(a.analysis[k]))}</span></span><span class="acc-caret"></span></button>`+
+        `<div class="acc-body"><div class="acc-in">${k==="health"?'<p class="pers-note">Offered for reflection only — not medical or health advice.</p>':''}${R_bodyHTML(a.analysis[k],'pers-p')}</div></div></div>`
       ).join("");
       const pp=document.querySelector('#reading .panel[data-num="02"]');
       if(pp && pp.classList.contains('show')) R_animPersBody(R_$('R-pers-body'));
