@@ -882,6 +882,9 @@ body.has-stepper .wrap{padding-bottom:120px}
 #reading .acc.open .acc-teaser{display:none}
 #reading .acc .acc-caret{margin-top:2px}
 #reading .acc.open .acc-caret{margin-top:8px}
+#reading .acc:first-child .acc-h,#reading .d-sec.acc:first-child .acc-h{margin:0}
+#reading .acc .balrow{margin-top:2px}
+#reading .d-body > .acc:last-of-type{border-bottom:1px solid var(--line-faint)}
 #reading .detail-head{flex-wrap:wrap;row-gap:8px}
 #reading .detail-head.has-gloss{cursor:pointer}
 #reading .detail-head.has-gloss:focus-visible{outline:1px solid var(--gold-deep);outline-offset:4px}
@@ -2202,6 +2205,7 @@ function R_showPanel(i){
   R_updateStepper();
   R_buildMenu();
   R_$('R-navCenter').classList.remove('menu-open');
+  R_accReset(newP);
   R_revealPanel(newP);
   zTrack("reading_panel",{panel_index:ni+1,panel_name:newP.dataset.name||""});
 }
@@ -2209,7 +2213,7 @@ function R_revealPanel(panel){
   // ordered fade-in of the panel's top-level blocks, then any table rows quickly
   const blocks=[...panel.children].filter(el=>el.nodeType===1 && !el.classList.contains('panel-next'));
   blocks.forEach((b,i)=>{
-    if(b.id==='R-insights'){ R_animInsights(b); return; }   // grouped reveal handles its innards
+    if(b.id==='R-insights'){ R_animPersBody(b); return; }   // grouped reveal handles its innards
     if(b.id==='R-pers-body'){ R_animPersBody(b); return; }   // personality: section-by-section slow reveal
     b.classList.remove('rev-in'); void b.offsetWidth; b.style.animationDelay=(i*0.12)+'s'; b.classList.add('rev-in');
   });
@@ -2327,24 +2331,41 @@ function R_teaser(t){ const ss=R_splitSentences(t); return ss.length?ss[0]:""; }
 /* Personality: when the reader scrolls down to the next collapsed heading, it opens by itself.
    Sections already read are left open on purpose: collapsing text above the reader would make the page jump. */
 let R_accY=0, R_accTick=false, R_accHold=0;
+const R_ACC_HOSTS='#R-pers-body,#R-insights,#signDetail .d-body,#houseDetail .d-body';
 function R_accAuto(){
   R_accTick=false;
   const y=window.scrollY, down=y>R_accY+2; R_accY=y; if(!down) return;
   if(Date.now()<R_accHold) return;            // the page is moving by itself (section change) or a section has just opened
-  const host=R_$('R-pers-body'); if(!host || !host.offsetParent) return;
-  const secs=[...host.querySelectorAll('.acc')];
-  for(let i=1;i<secs.length;i++){
-    const sc=secs[i];
-    if(sc.classList.contains('open') || sc.dataset.userClosed || sc.dataset.auto) continue;
-    if(!secs[i-1].classList.contains('open')) return;                 // the reader skipped the one before: leave the rest to them
-    const top=sc.getBoundingClientRect().top;
-    if(top > 0 && top < window.innerHeight*0.58){
-      R_accHold=Date.now()+700;
-      sc.dataset.auto="1"; sc.classList.add('open');
-      const h=sc.querySelector('.acc-h'); if(h) h.setAttribute('aria-expanded','true');
+  const panel=document.querySelector('#reading .panel.show'); if(!panel) return;
+  for(const host of panel.querySelectorAll(R_ACC_HOSTS)){
+    if(!host.offsetParent) continue;
+    const secs=[...host.children].filter(el=>el.classList.contains('acc'));
+    for(let i=1;i<secs.length;i++){
+      const sc=secs[i];
+      if(sc.classList.contains('open') || sc.dataset.userClosed) continue;
+      if(!secs[i-1].classList.contains('open')) break;                // the reader skipped the one before: leave the rest to them
+      const top=sc.getBoundingClientRect().top;
+      if(top > 0 && top < window.innerHeight*0.58){
+        R_accHold=Date.now()+700;
+        sc.classList.add('open');
+        const h=sc.querySelector('.acc-h'); if(h) h.setAttribute('aria-expanded','true');
+        return;                                                        // one at a time
+      }
+      break;
     }
-    return;                                                            // one at a time
   }
+}
+/* every time a section of the reading is opened again, its sub-sections start over: first one open, the rest folded,
+   so they unfold again as the reader scrolls */
+function R_accReset(panel){
+  if(!panel) return;
+  panel.querySelectorAll(R_ACC_HOSTS).forEach(host=>{
+    [...host.children].filter(el=>el.classList.contains('acc')).forEach((sc,i)=>{
+      sc.classList.toggle('open', i===0); delete sc.dataset.userClosed;
+      const h=sc.querySelector('.acc-h'); if(h) h.setAttribute('aria-expanded', i===0?'true':'false');
+    });
+  });
+  R_accHold=Math.max(R_accHold, Date.now()+900);
 }
 window.addEventListener('scroll', ()=>{ if(!R_accTick){ R_accTick=true; requestAnimationFrame(R_accAuto); } }, {passive:true});
 /* chart: enlarge */
@@ -2530,8 +2551,8 @@ function R_select(pickerId,detailId,kind,i){
       const bodyEl=el.querySelector('.d-body'); if(!bodyEl) return;
       const sections=R_parseReport(d);
       if(sections){
-        bodyEl.innerHTML=sections.map(([h,t])=>
-          `<div class="d-sec"><div class="d-h">${R_esc(h)}</div>${R_bodyHTML(t,'d-p')}</div>`
+        bodyEl.innerHTML=sections.map(([h,t],si)=>
+          `<div class="d-sec acc${si===0?' open':''}"><button type="button" class="d-h acc-h" aria-expanded="${si===0}" onclick="R_acc(this)"><span class="acc-l"><span>${R_esc(h)}</span><span class="acc-teaser">${R_esc(R_teaser(t))}</span></span><span class="acc-caret"></span></button><div class="acc-body"><div class="acc-in">${R_bodyHTML(t,'d-p')}</div></div></div>`
         ).join("")+cta;
         R_animDetailBody(bodyEl);
       } else { bodyEl.innerHTML=R_rawBox(d,retry)+cta; }
@@ -2820,20 +2841,13 @@ function R_loadInsights(){
       ? "Together your chart is evenly spread — your energy doesn't concentrate in one quarter, so you adapt between inner and outer, self and others."
       : `Together your chart leans ${ewTie?"":ewDom.toLowerCase()}${(!ewTie&&!nsTie)?"-and-":""}${nsTie?"":nsDom.toLowerCase()}: your energy gathers there, so you tend to grow ${ewTie?"":(ewDom==="West"?"through close connections":"by following your own lead")}${(!ewTie&&!nsTie)?" and ":""}${nsTie?"":(nsDom==="North"?"in more private, personal ways":"out in the public, visible world")}.`;
 
-    let html='';
-    html+='<div class="bal-h">Elements</div>'+R_balrow(elItems)
-      +`<p class="bal-p">${elDomPara||""}</p>`
-      +`<p class="bal-p">${elLowPara||""}</p>`
-      +`<p class="bal-p">${elOverall}</p>`;
-    html+='<div class="bal-h">Modes</div>'+R_balrow(moItems)
-      +`<p class="bal-p">${moDomPara||""}</p>`
-      +`<p class="bal-p">${moLowPara||""}</p>`
-      +`<p class="bal-p">${moOverall}</p>`;
-    if(R_hasTime) html+='<div class="bal-h">Hemispheres</div>'
-      +R_balrow(ewItems)+`<p class="bal-p">${ewPara}</p>`
-      +R_balrow(nsItems)+`<p class="bal-p">${nsPara}</p>`
-      +`<p class="bal-p">${hemiOverall}</p>`;
-    else html+='<div class="bal-h">Hemispheres</div><p class="bal-p" style="color:var(--muted)">Hemispheres are read from your houses, which need a birth time.</p>';
+    const P=x=>x?`<p class="bal-p">${x}</p>`:"";
+    const sec=(title,teaser,inner,open)=>`<div class="pers-sec acc${open?' open':''}"><button type="button" class="pers-h acc-h" aria-expanded="${!!open}" onclick="R_acc(this)"><span class="acc-l"><span>${title}</span><span class="acc-teaser">${R_esc(teaser||"")}</span></span><span class="acc-caret"></span></button><div class="acc-body"><div class="acc-in">${inner}</div></div></div>`;
+    let html=sec("Elements", R_teaser(elDomPara||elOverall), R_balrow(elItems)+P(elDomPara)+P(elLowPara)+P(elOverall), true)
+      + sec("Modes", R_teaser(moDomPara||moOverall), R_balrow(moItems)+P(moDomPara)+P(moLowPara)+P(moOverall), false)
+      + (R_hasTime
+          ? sec("Hemispheres", R_teaser(ewPara), R_balrow(ewItems)+P(ewPara)+R_balrow(nsItems)+P(nsPara)+P(hemiOverall), false)
+          : sec("Hemispheres", "Needs a birth time.", '<p class="bal-p" style="color:var(--muted)">Hemispheres are read from your houses, which need a birth time.</p>', false));
     host.innerHTML=html;
   }catch(e){ host.innerHTML=R_errBox(e); }
 }
