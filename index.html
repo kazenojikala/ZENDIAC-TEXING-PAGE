@@ -684,19 +684,10 @@ h2{font-family:var(--serif);font-weight:300;font-size:30px;line-height:1.15;colo
         <p class="module-sub">Enter your details once — we'll map every planet and what it means.</p>
       </div>
       <div class="form-grid">
-        <div class="field"><label>First Name <span class="req">*</span></label><input id="b-first" type="text" placeholder="Enter first name"></div>
-        <div class="field"><label>Last Name <span class="req">*</span></label><input id="b-last" type="text" placeholder="Enter last name"></div>
         <div class="field"><label>Date of Birth <span class="req">*</span></label><input id="b-date" class="dpick" type="text" readonly placeholder="yyyy/mm/dd" autocomplete="off"></div>
         <div class="field"><label>Birth Time <span class="req">*</span></label><input id="b-time" class="tmask" type="text" inputmode="numeric" placeholder="hh:mm" autocomplete="off" maxlength="5">
           <label class="notime"><input id="b-notime" type="checkbox"> Unknown birth time</label></div>
         <div class="field full"><label>Birth Place <span class="req">*</span></label><input id="b-place" class="acplace" type="text" placeholder="Start typing a city…" autocomplete="off"></div>
-        <div class="field"><label>Gender <span class="req">*</span></label>
-          <div class="radios">
-            <label class="radio"><input type="radio" name="b-gender" value="Male" checked> Male</label>
-            <label class="radio"><input type="radio" name="b-gender" value="Female"> Female</label>
-          </div></div>
-        <div class="field"><label>Node Type <span class="req">*</span></label>
-          <select id="b-node" class="sel"><option>Mean Node</option><option>True Node</option></select></div>
       </div>
       <button class="go" id="basic-go" onclick="runBasic()">Reveal my placements</button>
       <div class="results" id="basic-results"></div>
@@ -710,19 +701,10 @@ h2{font-family:var(--serif);font-weight:300;font-size:30px;line-height:1.15;colo
         <p class="module-sub">See which of your natal planets are being activated — on any date you choose.</p>
       </div>
       <div class="form-grid">
-        <div class="field"><label>First Name <span class="req">*</span></label><input id="t-first" type="text" placeholder="Enter first name"></div>
-        <div class="field"><label>Last Name <span class="req">*</span></label><input id="t-last" type="text" placeholder="Enter last name"></div>
         <div class="field"><label>Date of Birth <span class="req">*</span></label><input id="t-date" class="dpick" type="text" readonly placeholder="yyyy/mm/dd" autocomplete="off"></div>
         <div class="field"><label>Birth Time <span class="req">*</span></label><input id="t-time" class="tmask" type="text" inputmode="numeric" placeholder="hh:mm" autocomplete="off" maxlength="5">
           <label class="notime"><input id="t-notime" type="checkbox"> Unknown birth time</label></div>
         <div class="field full"><label>Birth Place <span class="req">*</span></label><input id="t-place" class="acplace" type="text" placeholder="Start typing a city…" autocomplete="off"></div>
-        <div class="field"><label>Gender <span class="req">*</span></label>
-          <div class="radios">
-            <label class="radio"><input type="radio" name="t-gender" value="Male" checked> Male</label>
-            <label class="radio"><input type="radio" name="t-gender" value="Female"> Female</label>
-          </div></div>
-        <div class="field"><label>Node Type <span class="req">*</span></label>
-          <select id="t-node" class="sel"><option>Mean Node</option><option>True Node</option></select></div>
         <div class="field"><label>Date of Transit <span class="req">*</span></label><input id="t-tdate" class="dpick" type="text" readonly placeholder="yyyy/mm/dd" autocomplete="off"></div>
         <div class="field"><label>Transit Time <span class="req">*</span></label><input id="t-ttime" class="tmask" type="text" inputmode="numeric" placeholder="hh:mm" autocomplete="off" maxlength="5"></div>
       </div>
@@ -1438,18 +1420,28 @@ function showRaw(elId,obj){
 function divineFields(prefix){
   const d=splitDate(val(prefix+"-date")), t=splitTime(val(prefix+"-time"));
   const pl=PLACE_STORE[prefix+"-place"]||{};
+  // Unknown birth time: DivineAPI rejects an empty hour/min ("please enter valid hour/minute"),
+  // so when the user ticks "Unknown birth time" (or leaves it blank) we send noon (12:00) as a
+  // neutral default. The reading already hides house/ascendant content when the time is unknown.
+  const ntEl=document.getElementById(prefix+"-notime");
+  const noTime=(ntEl && ntEl.checked) || t.hour==="" || t.hour==null;
+  const H=noTime?12:t.hour, M=noTime?0:t.min;
   // route A: if we have the IANA zone name, compute the offset for the BIRTH date
   // (handles DST / historic changes); otherwise fall back to the stored tzone.
   let tzone=pl.tzone;
   if(pl.tzName && d.year){
-    const z=zoneOffsetDecimal(pl.tzName,d.year,d.month,d.day,(t.hour==null?12:t.hour),t.min||0);
+    const z=zoneOffsetDecimal(pl.tzName,d.year,d.month,d.day,H,M);
     if(z!=null) tzone=z;
   }
+  // Name & gender are not used in the natal calculation and are no longer asked on the form,
+  // so send neutral defaults — DivineAPI never rejects the request for a missing name/gender.
+  const nm=((val(prefix+"-first")+" "+val(prefix+"-last")).trim())||"Guest";
+  const gd=(gender(prefix+"-gender")||"male").toLowerCase();
   return {
-    full_name:(val(prefix+"-first")+" "+val(prefix+"-last")).trim(),
+    full_name:nm,
     day:d.day, month:d.month, year:d.year,
-    hour:t.hour, min:t.min, sec:0,
-    gender:(gender(prefix+"-gender")||"").toLowerCase(),
+    hour:H, min:M, sec:0,
+    gender:gd,
     place:pl.place||val(prefix+"-place"),
     lat:pl.lat, lon:pl.lon, tzone:tzone,
     lan:"en", house_system:"P"
@@ -1458,7 +1450,7 @@ function divineFields(prefix){
 function basicPayload(){return Object.assign({
   firstName:val("b-first"),lastName:val("b-last"),date:val("b-date"),time:val("b-time"),
   unknownTime:document.getElementById("b-notime").checked,place:val("b-place"),
-  gender:gender("b-gender"),node:val("b-node"),
+  gender:gender("b-gender"),
   placeData:PLACE_STORE["b-place"]||null
 }, divineFields("b"));}
 function transitPayload(){
@@ -1475,7 +1467,7 @@ function transitPayload(){
   return Object.assign({
     firstName:val("t-first"),lastName:val("t-last"),date:val("t-date"),time:val("t-time"),
     unknownTime:document.getElementById("t-notime").checked,place:val("t-place"),
-    gender:gender("t-gender"),node:val("t-node"),
+    gender:gender("t-gender"),
     placeData:PLACE_STORE["t-place"]||null,
     transitDate:disp,transitTime:val("t-ttime"),
     transit:{year:TY,month:TM,day:TD}, transit_time:{hour:TH,min:TMIN},
@@ -1573,7 +1565,6 @@ function txChartSection(opts){
     <div class="tx-info">
       <div class="tx-card"><div class="tx-card-h">Personal details</div>
         <div class="tx-row">
-          <div class="tx-item"><span class="tx-k">Name</span><span class="tx-v">${meta.name||"—"}</span></div>
           <div class="tx-item"><span class="tx-k">Date of birth</span><span class="tx-v">${meta.dob||"—"}</span></div>
           <div class="tx-item"><span class="tx-k">Time of birth</span><span class="tx-v">${meta.time||"—"}</span></div>
           <div class="tx-item"><span class="tx-k">Place of birth</span><span class="tx-v">${meta.place||"—"}</span></div>
@@ -2108,7 +2099,6 @@ function initReading(dataArr, meta, hasTime, payload){
   // ---- REAL data first (headline + pickers) ----
   try{
     if(meta) R_$('R-pd').innerHTML=
-      `<tr><td>Name</td><td>${meta.name||"—"}</td></tr>`+
       `<tr><td>Date of birth</td><td>${meta.dob||"—"}</td></tr>`+
       `<tr><td>Time of birth</td><td>${hasTime?(meta.time||"—"):"—"}</td></tr>`+
       `<tr><td>Place of birth</td><td>${meta.place||"—"}</td></tr>`;
