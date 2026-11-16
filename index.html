@@ -779,17 +779,13 @@ body.chart-on .site-foot{display:block}
 #reading .nav-step{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
 #reading .nav-current{min-height:44px}
 @media (max-width:560px){ #reading .navbar{padding:14px 16px} #reading .nav-title{font-size:22px} }
+/* chart panel: clip sideways without becoming a scroll box (the old overflow-x:hidden showed a scrollbar while the panel faded in) */
+#reading .panel[data-num="01"]{overflow:visible;overflow-x:clip}
 /* chart: tap to enlarge + key */
 #reading .chart-tap{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-align:center;margin:12px 0 0}
 #reading .ph + .chart-tap, #reading .ph ~ .chart-key{display:none}
-#reading .chart-key{margin:22px 0 0;border-top:1px solid var(--line-faint);border-bottom:1px solid var(--line-faint)}
-#reading .chart-key summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;
-  font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-mute);padding:17px 0;min-height:52px}
-#reading .chart-key summary::-webkit-details-marker{display:none}
-#reading .chart-key summary::after{content:"";width:8px;height:8px;border-right:1.5px solid var(--gold-mute);border-bottom:1.5px solid var(--gold-mute);
-  transform:rotate(45deg);margin:-4px 4px 0 12px;transition:transform .25s}
-#reading .chart-key[open] summary::after{transform:rotate(-135deg);margin-top:4px}
-#reading .ck-body{padding:2px 0 20px}
+#reading .chart-key{margin:22px 0 0;border-bottom:1px solid var(--line-faint)}
+#reading .ck-body{padding-top:2px}
 #reading .ck-row{font-family:var(--serif);font-size:16.5px;line-height:1.55;color:var(--body);margin:0 0 12px}
 #reading .ck-row b{font-family:var(--sans);font-weight:500;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-deep);display:block;margin-bottom:3px}
 #reading .ck-row i{font-style:normal;font-family:var(--sans);font-size:12.5px;color:var(--label)}
@@ -808,8 +804,27 @@ body.chart-on .site-foot{display:block}
 #reading .acc-caret{width:8px;height:8px;border-right:1.5px solid var(--gold-mute);border-bottom:1.5px solid var(--gold-mute);
   transform:rotate(45deg);margin:-4px 4px 0 12px;transition:transform .25s;flex:0 0 auto}
 #reading .acc.open .acc-caret{transform:rotate(-135deg);margin-top:4px}
-#reading .acc-body{display:none;padding:0 0 22px}
-#reading .acc.open .acc-body{display:block}
+#reading .acc-body{display:grid;grid-template-rows:0fr;opacity:0;visibility:hidden;
+  transition:grid-template-rows .45s ease,opacity .4s ease,visibility 0s linear .45s}
+#reading .acc.open .acc-body{grid-template-rows:1fr;opacity:1;visibility:visible;transition:grid-template-rows .45s ease,opacity .5s ease .08s,visibility 0s}
+#reading .acc-in{overflow:hidden;min-height:0}
+#reading .acc.open .acc-in{padding-bottom:22px}
+/* other things that used to pop in: fade them */
+#reading .nav-center.menu-open .nav-menu{animation:rdFade .28s ease both}
+.chart-zoom.show{animation:czIn .3s ease both}
+@keyframes czIn{from{opacity:0}to{opacity:1}}
+#natal-basic.editing > *:not(.b-summary){animation:rdFade .4s ease both}
+.err-card{animation:rdFade .45s ease both}
+.field.has-err .field-err{animation:rdFade .3s ease both}
+.ac-list.open{animation:rdFade .22s ease both}
+#reading .soft-fail,#reading.no-time .time-note{animation:rdFade .45s ease both}
+/* end-of-section button */
+#reading .sec-next{display:flex;flex-direction:column;align-items:center;gap:9px;width:100%;margin:46px 0 4px;padding:20px 16px 22px;
+  background:transparent;border:1px solid var(--gold-deep);cursor:pointer;box-shadow:0 0 14px 2px rgba(212,175,55,.10);transition:background .25s,box-shadow .25s}
+#reading .sec-next:hover{background:rgba(212,175,55,.05);box-shadow:0 0 22px 3px rgba(212,175,55,.22)}
+#reading .sn-k{font-family:var(--sans);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-mute)}
+#reading .sn-t{font-family:var(--serif);font-size:23px;font-weight:300;line-height:1.15;color:var(--ink)}
+#reading .sn-t .pn-arrow{color:var(--gold-mute);margin-left:6px;font-size:22px}
 #reading .pers-tabs{margin-bottom:22px}
 /* placement detail: one plain-language line about the planet */
 #reading .detail-head{margin-bottom:14px}
@@ -951,16 +966,16 @@ body.has-stepper .wrap{padding-bottom:150px}
     </div>
     <p class="chart-tap">Tap the chart to enlarge</p>
     <p class="chart-note only-notime">Drawn for 12:00 noon. The house lines and Ascendant shown here need a birth time.</p>
-    <details class="chart-key">
-      <summary>How to read the wheel</summary>
-      <div class="ck-body">
+    <div class="acc chart-key">
+      <button type="button" class="acc-h" aria-expanded="false" onclick="R_acc(this)"><span>How to read the wheel</span><span class="acc-caret"></span></button>
+      <div class="acc-body"><div class="acc-in ck-body">
         <p class="ck-row"><b>Outer ring</b>The twelve signs. <i>Ar Aries · Ta Taurus · Ge Gemini · Cn Cancer · Le Leo · Vi Virgo · Li Libra · Sc Scorpio · Sa Sagittarius · Cp Capricorn · Aq Aquarius · Pi Pisces</i></p>
         <p class="ck-row"><b>Inside the ring</b>Your planets, where they stood when you were born. <i>Su Sun · Mo Moon · Me Mercury · Ve Venus · Ma Mars · Ju Jupiter · Sa Saturn · Ur Uranus · Ne Neptune · Pl Pluto · NN North Node · SN South Node</i></p>
         <p class="ck-row"><b>Numbers 1–12</b>The houses — twelve areas of life, from self (1) to the inner world (12).</p>
         <p class="ck-row"><b>AS · DS · MC · LC</b>The four angles: Ascendant (your Rising sign), Descendant, Midheaven, and the base of the chart.</p>
         <p class="ck-row"><b>Colored lines</b>Aspects — the angles your planets make to one another.</p>
-      </div>
-    </details>
+      </div></div>
+    </div>
     <div class="time-note only-notime">
       <p>Your Rising sign, Personality reading, and House placements depend on the exact time of birth, so they are left out of this reading.</p>
       <button onclick="B_addTime()">Add my birth time</button>
@@ -2277,7 +2292,10 @@ function R_revealStage(host, stage, onDone){
   });
   R_timers.push(setTimeout(()=>{ onDone&&onDone(); }, delay));
 }
+function R_settleReading(){ const rd=R_$('reading'); if(rd) rd.classList.remove('result-appear'); }
+document.addEventListener('animationend', e=>{ if(e.target && e.target.id==='reading' && e.animationName==='resultAppear') R_settleReading(); });
 function R_openIntro(){
+  R_settleReading();
   const ov=R_$('R-introOverlay'), host=R_$('R-ms-body');
   R_clearTimers(); host.innerHTML=""; host.classList.remove('out'); ov.classList.add('show');
   R_revealStage(host, R_STAGE_F, ()=>{
@@ -2476,6 +2494,14 @@ function initReading(dataArr, meta, hasTime, payload){
   allPanels.forEach(p=>{ p.classList.remove('show','p-in','p-out'); const old=p.querySelector('.panel-next'); if(old) old.remove(); });
   R_panels=allPanels.filter(p=>R_hasTime || !p.hasAttribute('data-needs-time'));
   R_idx=0;
+  // end-of-section button: "Continue to section 2 / Personality" (same call as the stepper, so reading_panel fires as before)
+  R_panels.forEach((p,k)=>{
+    if(k===R_panels.length-1) return;
+    const b=document.createElement('button'); b.type='button'; b.className='panel-next sec-next';
+    b.innerHTML=`<span class="sn-k">Continue to section ${k+2}</span><span class="sn-t">${R_panels[k+1].dataset.name||""}<span class="pn-arrow">›</span></span>`;
+    b.onclick=()=>R_stepGo(1);
+    p.appendChild(b);
+  });
   R_initStepper();
 
   // ---- big three ----
@@ -2541,7 +2567,7 @@ async function R_loadPersonality(){
       const po=[["Personality","personality"],["Career","career"],["Health","health"],["Finance","finance"],["Relationships","relationships"]];
       R_$('R-pers-body').innerHTML=po.filter(([l,k])=>a.analysis[k]).map(([l,k],i)=>
         `<div class="pers-sec acc${i===0?' open':''}"><button type="button" class="pers-h acc-h" aria-expanded="${i===0}" onclick="R_acc(this)"><span>${l}</span><span class="acc-caret"></span></button>`+
-        `<div class="acc-body">${k==="health"?'<p class="pers-note">Offered for reflection only — not medical or health advice.</p>':''}${R_paragraphs(a.analysis[k]).map(x=>`<p class="pers-p">${R_esc(x)}</p>`).join('')}</div></div>`
+        `<div class="acc-body"><div class="acc-in">${k==="health"?'<p class="pers-note">Offered for reflection only — not medical or health advice.</p>':''}${R_paragraphs(a.analysis[k]).map(x=>`<p class="pers-p">${R_esc(x)}</p>`).join('')}</div></div></div>`
       ).join("");
       const pp=document.querySelector('#reading .panel[data-num="02"]');
       if(pp && pp.classList.contains('show')) R_animPersBody(R_$('R-pers-body'));
