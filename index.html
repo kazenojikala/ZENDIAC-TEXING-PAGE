@@ -882,6 +882,9 @@ body.has-stepper .wrap{padding-bottom:120px}
 #reading .acc.open .acc-teaser{display:none}
 #reading .acc .acc-caret{margin-top:2px}
 #reading .acc.open .acc-caret{margin-top:8px}
+.cz-scroll{overflow:hidden;display:flex;align-items:center;justify-content:center}
+.cz-inner{width:min(calc(100vw - 16px), calc(100vh - 20px));width:min(calc(100vw - 16px), calc(100dvh - 20px));max-width:none;margin:0;padding:0}
+.cz-hint{display:none}
 
 </style>
 <!-- Route A: offline timezone lookup (lat/lon -> IANA zone), free & keyless.
@@ -975,7 +978,6 @@ body.has-stepper .wrap{padding-bottom:120px}
   <div id="reading" style="display:none">
 
   <div id="R-below" class="below revealed">
-  <div class="big3-h">Your big three</div>
   <div class="big3" id="R-big3"></div>
   <p class="big3-note only-notime">Without a birth time, the Moon sign can differ if the Moon changed signs that day.</p>
   <div class="howto-wrap"><button class="howto-btn" onclick="R_openIntro()">How to read this</button></div>
@@ -1087,7 +1089,7 @@ body.has-stepper .wrap{padding-bottom:120px}
 <div class="chart-zoom" id="chartZoom">
   <span class="cz-hint">Drag to look around</span>
   <button class="cz-close" onclick="R_zoomClose()" aria-label="Close">&times;</button>
-  <div class="cz-scroll" id="chartZoomScroll"><div class="cz-inner" id="chartZoomInner"></div></div>
+  <div class="cz-scroll" id="chartZoomScroll" onclick="if(event.target===this)R_zoomClose()"><div class="cz-inner" id="chartZoomInner"></div></div>
 </div>
 
 <script>
@@ -2375,19 +2377,10 @@ function R_openIntro(){
   R_clearTimers(); host.innerHTML=""; host.classList.remove('out'); ov.classList.add('show');
   R_revealStage(host, R_STAGE_F, ()=>{
     const btn=document.createElement('button'); btn.className='ms-continue fade-init';
-    btn.textContent='Continue to the advanced readings  →'; host.appendChild(btn);
+    btn.textContent='Got it'; host.appendChild(btn);
     requestAnimationFrame(()=>btn.classList.add('fade-in'));
     R_timers.push(setTimeout(()=>btn.classList.add('glow'),800));
-    btn.onclick=()=>{
-      R_clearTimers(); host.classList.add('out');
-      setTimeout(()=>{ host.innerHTML=""; host.scrollTop=0; const b=host.closest('.modal-box'); if(b)b.scrollTop=0; R_$('R-introOverlay').scrollTop=0; host.classList.remove('out');
-        R_revealStage(host, R_STAGE_A, ()=>{
-          const go=document.createElement('button'); go.className='ms-continue fade-init'; go.textContent='View my readings  →';
-          host.appendChild(go); requestAnimationFrame(()=>go.classList.add('fade-in'));
-          R_timers.push(setTimeout(()=>go.classList.add('glow'),800)); go.onclick=R_closeIntro;
-        });
-      },440);
-    };
+    btn.onclick=R_closeIntro;      // close and carry on reading where they were
   });
 }
 function R_closeIntro(){ R_clearTimers(); R_$('R-introOverlay').classList.remove('show'); }
