@@ -745,6 +745,94 @@ body.chart-on .site-foot{display:block}
   .err-card{padding:26px 20px}
 }
 
+/* ===== batch 2: reading page ===== */
+/* form collapses to one line once the reading is showing */
+.b-summary{display:none;align-items:center;justify-content:space-between;gap:14px}
+.bs-text{font-size:13px;color:var(--label);line-height:1.5;min-width:0}
+.bs-edit{flex:0 0 auto;background:none;border:none;color:var(--gold-mute);font-family:var(--sans);font-size:11px;
+  letter-spacing:.16em;text-transform:uppercase;cursor:pointer;padding:12px 2px 12px 12px;min-height:44px}
+.bs-edit:hover{color:var(--gold)}
+.module#natal-basic.has-reading:not(.editing){padding:6px 18px;border:1px solid var(--line-soft);background:var(--block);margin-bottom:0}
+#natal-basic.has-reading:not(.editing) > *:not(.b-summary){display:none !important}
+#natal-basic.has-reading:not(.editing) > .b-summary{display:flex}
+#reading .r-crosslink{margin-top:34px}
+/* big three */
+#reading .big3-h{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold-deep);text-align:center;margin:0 0 14px}
+#reading .big3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+#reading .b3{border:1px solid var(--line-soft);background:var(--block);padding:16px 6px 15px;text-align:center;min-width:0}
+#reading .b3-k{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--label)}
+#reading .b3-g{font-size:22px;line-height:1;color:var(--gold-mute);margin:12px 0 8px}
+#reading .b3-s{font-family:var(--serif);font-size:21px;line-height:1.15;color:var(--ink);overflow-wrap:anywhere}
+#reading .b3-d{font-size:11.5px;color:var(--muted);line-height:1.4;margin-top:7px}
+#reading .b3-off .b3-g{color:var(--faint)}
+#reading .b3-off .b3-s{font-family:var(--sans);font-size:12.5px;color:var(--muted);line-height:1.4}
+#reading .b3-add{margin-top:8px;background:none;border:none;border-bottom:1px solid var(--gold-dot);color:var(--gold-mute);
+  font-family:var(--sans);font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;padding:6px 0 3px}
+#reading .big3-note{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;margin:12px auto 0;max-width:44ch}
+/* "How to read this": a quiet text link instead of a glowing button */
+#reading .howto-wrap{margin:8px 0 18px}
+#reading .howto-btn{border:none;animation:none;color:var(--muted);padding:12px 10px;min-height:44px;letter-spacing:.14em;
+  text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:5px}
+#reading .howto-btn:hover{background:transparent;color:var(--gold-mute)}
+/* section header: step count, no side arrows (the stepper below moves between sections) */
+#reading .nav-arrow{display:none}
+#reading .nav-step{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+#reading .nav-current{min-height:44px}
+@media (max-width:560px){ #reading .navbar{padding:14px 16px} #reading .nav-title{font-size:22px} }
+/* chart: tap to enlarge + key */
+#reading .chart-tap{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-align:center;margin:12px 0 0}
+#reading .ph + .chart-tap, #reading .ph ~ .chart-key{display:none}
+#reading .chart-key{margin:22px 0 0;border-top:1px solid var(--line-faint);border-bottom:1px solid var(--line-faint)}
+#reading .chart-key summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;
+  font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-mute);padding:17px 0;min-height:52px}
+#reading .chart-key summary::-webkit-details-marker{display:none}
+#reading .chart-key summary::after{content:"";width:8px;height:8px;border-right:1.5px solid var(--gold-mute);border-bottom:1.5px solid var(--gold-mute);
+  transform:rotate(45deg);margin:-4px 4px 0 12px;transition:transform .25s}
+#reading .chart-key[open] summary::after{transform:rotate(-135deg);margin-top:4px}
+#reading .ck-body{padding:2px 0 20px}
+#reading .ck-row{font-family:var(--serif);font-size:16.5px;line-height:1.55;color:var(--body);margin:0 0 12px}
+#reading .ck-row b{font-family:var(--sans);font-weight:500;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-deep);display:block;margin-bottom:3px}
+#reading .ck-row i{font-style:normal;font-family:var(--sans);font-size:12.5px;color:var(--label)}
+.chart-zoom{display:none;position:fixed;inset:0;z-index:300;background:#000}
+.chart-zoom.show{display:block}
+.cz-scroll{position:absolute;inset:0;overflow:auto;-webkit-overflow-scrolling:touch}
+.cz-inner{width:max(100vw,860px);max-width:1100px;margin:0 auto;padding:62px 12px 40px}
+.cz-close{position:fixed;top:10px;right:12px;z-index:2;width:46px;height:46px;background:rgba(10,10,10,.9);border:1px solid var(--line);
+  color:var(--body);font-size:26px;line-height:1;cursor:pointer}
+.cz-hint{position:fixed;top:22px;left:16px;z-index:2;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+/* personality: one section open at a time is easier to read on a phone */
+#reading .acc{border-top:1px solid var(--line-faint)}
+#reading .acc:last-child{border-bottom:1px solid var(--line-faint)}
+#reading .acc .acc-h{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;cursor:pointer;
+  margin:0;padding:18px 0;min-height:56px;text-align:left;font-family:var(--sans);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-mute)}
+#reading .acc-caret{width:8px;height:8px;border-right:1.5px solid var(--gold-mute);border-bottom:1.5px solid var(--gold-mute);
+  transform:rotate(45deg);margin:-4px 4px 0 12px;transition:transform .25s;flex:0 0 auto}
+#reading .acc.open .acc-caret{transform:rotate(-135deg);margin-top:4px}
+#reading .acc-body{display:none;padding:0 0 22px}
+#reading .acc.open .acc-body{display:block}
+#reading .pers-tabs{margin-bottom:22px}
+/* placement detail: one plain-language line about the planet */
+#reading .detail-head{margin-bottom:14px}
+#reading .detail-sub{font-family:var(--serif);font-style:italic;font-size:16px;line-height:1.5;color:var(--label);margin:0 0 6px}
+#reading .pchip{min-height:46px}
+/* stepper */
+.stepper{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:40px 0 0}
+.st-btn{background:transparent;border:1px solid var(--line);color:var(--label);font-family:var(--sans);font-size:11px;
+  letter-spacing:.14em;text-transform:uppercase;cursor:pointer;min-height:50px;padding:0 16px;line-height:1.3;transition:border-color .2s,color .2s}
+.st-btn:hover{border-color:var(--gold-deep);color:var(--ink)}
+.st-prev{flex:0 0 auto}
+.st-next{flex:1 1 auto;max-width:340px;border-color:var(--gold-deep);color:var(--ink);text-align:center}
+.st-count{flex:0 0 auto;font-family:var(--serif);font-size:17px;color:var(--label);white-space:nowrap;padding:0 4px}
+.st-hide{visibility:hidden}
+.stepper.st-fixed{position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0;justify-content:center;
+  background:rgba(5,5,5,.97);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+  transform:translateY(110%);transition:transform .3s ease}
+.stepper.st-fixed.st-on{transform:none}
+.stepper.st-fixed .st-next{max-width:300px}
+.stepper.st-fixed .st-prev{min-width:92px}
+body.has-stepper .wrap{padding-bottom:150px}
+@media (prefers-reduced-motion:reduce){ .stepper.st-fixed{transition:none} }
+
 </style>
 <!-- Route A: offline timezone lookup (lat/lon -> IANA zone), free & keyless.
      Used only in LIVE mode to derive DivineAPI's tzone from Photon's coordinates.
@@ -769,6 +857,7 @@ body.chart-on .site-foot{display:block}
 
     <!-- PART ONE: NATAL REPORT -->
     <section class="module" id="natal-basic">
+      <div class="b-summary"><span class="bs-text" id="b-summary-text"></span><button class="bs-edit" onclick="B_edit()">Edit</button></div>
       <div class="module-head">
         <h2>Your free birth chart reading</h2>
       </div>
@@ -810,7 +899,6 @@ body.chart-on .site-foot{display:block}
         <div class="err-msg" id="E-msg" role="status"></div>
       </div>
       <div class="results" id="basic-results"></div>
-      <button class="crosslink" onclick="goToModule('transit')">Continue to your natal transit <span class="cl-arw">→</span></button>
     </section>
 
     <!-- PART TWO: NATAL TRANSIT -->
@@ -837,11 +925,15 @@ body.chart-on .site-foot{display:block}
   <div id="reading" style="display:none">
 
   <div id="R-below" class="below revealed">
+  <div class="big3-h">Your big three</div>
+  <div class="big3" id="R-big3"></div>
+  <p class="big3-note only-notime">Without a birth time, the Moon sign can differ if the Moon changed signs that day.</p>
   <div class="howto-wrap"><button class="howto-btn" onclick="R_openIntro()">How to read this</button></div>
   <!-- top navigation -->
   <div class="navbar" id="R-navbar">
     <button class="nav-arrow prev" onclick="R_step(-1)" aria-label="Previous">&lt;</button>
     <div class="nav-center" id="R-navCenter">
+      <div class="nav-step" id="R-navStep"></div>
       <div class="nav-current" onclick="R_toggleMenu(event)">
         <span class="nav-title" id="R-navTitle">Natal Chart</span>
         <span class="nav-caret"></span>
@@ -857,11 +949,18 @@ body.chart-on .site-foot{display:block}
     <div class="ph" id="R-chartSlot">Chart wheel image
       <small>From DivineAPI's Natal Wheel Chart endpoint (returns an SVG). We'll wire it next — this box marks where it appears.</small>
     </div>
+    <p class="chart-tap">Tap the chart to enlarge</p>
     <p class="chart-note only-notime">Drawn for 12:00 noon. The house lines and Ascendant shown here need a birth time.</p>
-    <div class="dt-h">Personal details</div>
-    <table class="dt" id="R-pd"></table>
-    <div class="dt-h">Astrological details</div>
-    <table class="dt" id="R-headline"></table>
+    <details class="chart-key">
+      <summary>How to read the wheel</summary>
+      <div class="ck-body">
+        <p class="ck-row"><b>Outer ring</b>The twelve signs. <i>Ar Aries · Ta Taurus · Ge Gemini · Cn Cancer · Le Leo · Vi Virgo · Li Libra · Sc Scorpio · Sa Sagittarius · Cp Capricorn · Aq Aquarius · Pi Pisces</i></p>
+        <p class="ck-row"><b>Inside the ring</b>Your planets, where they stood when you were born. <i>Su Sun · Mo Moon · Me Mercury · Ve Venus · Ma Mars · Ju Jupiter · Sa Saturn · Ur Uranus · Ne Neptune · Pl Pluto · NN North Node · SN South Node</i></p>
+        <p class="ck-row"><b>Numbers 1–12</b>The houses — twelve areas of life, from self (1) to the inner world (12).</p>
+        <p class="ck-row"><b>AS · DS · MC · LC</b>The four angles: Ascendant (your Rising sign), Descendant, Midheaven, and the base of the chart.</p>
+        <p class="ck-row"><b>Colored lines</b>Aspects — the angles your planets make to one another.</p>
+      </div>
+    </details>
     <div class="time-note only-notime">
       <p>Your Rising sign, Personality reading, and House placements depend on the exact time of birth, so they are left out of this reading.</p>
       <button onclick="B_addTime()">Add my birth time</button>
@@ -894,6 +993,12 @@ body.chart-on .site-foot{display:block}
     <div class="detail" id="houseDetail"></div>
   </section>
 
+  <div class="stepper" id="R-stepper" role="navigation" aria-label="Reading sections">
+    <button class="st-btn st-prev" id="R-stPrev" onclick="R_stepGo(-1)">‹ Back</button>
+    <span class="st-count" id="R-stCount"></span>
+    <button class="st-btn st-next" id="R-stNext" onclick="R_stepGo(1)"></button>
+  </div>
+
   <!-- EMAIL CAPTURE -->
   <div id="R-email" class="email-capture">
     <div class="ec-title">Keep your reading</div>
@@ -905,6 +1010,7 @@ body.chart-on .site-foot{display:block}
     <label class="ec-consent"><input id="R-email-consent" type="checkbox"> Email me my reading and occasional guidance &amp; offers from ZENDIAC. You can unsubscribe anytime.</label>
     <div id="R-email-msg" class="ec-msg"></div>
   </div>
+  <button class="crosslink r-crosslink" onclick="goToModule('transit')">Continue to your natal transit <span class="cl-arw">→</span></button>
   </div><!-- /below -->
 
   <!-- guided intro modal -->
@@ -926,6 +1032,11 @@ body.chart-on .site-foot{display:block}
 </main>
 
 <div id="toast"></div>
+<div class="chart-zoom" id="chartZoom">
+  <span class="cz-hint">Drag to look around</span>
+  <button class="cz-close" onclick="R_zoomClose()" aria-label="Close">&times;</button>
+  <div class="cz-scroll" id="chartZoomScroll"><div class="cz-inner" id="chartZoomInner"></div></div>
+</div>
 
 <script>
 /* ============================================================
@@ -1632,6 +1743,12 @@ function B_showError(){
   c.style.display="block";
   requestAnimationFrame(()=>c.scrollIntoView({behavior:"smooth",block:"center"}));
 }
+/* reopen the collapsed form */
+function B_edit(){
+  const mod=document.getElementById("natal-basic"); if(!mod) return;
+  mod.classList.add("editing");
+  requestAnimationFrame(()=>window.scrollTo({top:Math.max(0, mod.getBoundingClientRect().top+window.scrollY-16), behavior:"smooth"}));
+}
 function B_hideError(){ const c=document.getElementById("basic-error"); if(c) c.style.display="none"; }
 /* typed a place but didn't tap a suggestion: pick it automatically when there is exactly one match, otherwise show the list */
 async function B_resolvePlace(){
@@ -1683,10 +1800,11 @@ async function runBasic(){
       const meta={ name:(p.firstName+" "+p.lastName).trim(), dob:p.date, time:p.time, place:p.place };
       const rd=document.getElementById("reading"); rd.style.display="block";
       rd.classList.remove("result-appear"); void rd.offsetWidth; rd.classList.add("result-appear");
-      document.getElementById("natal-basic").classList.add("has-reading");
+      const mod=document.getElementById("natal-basic"); mod.classList.add("has-reading"); mod.classList.remove("editing");
+      document.getElementById("b-summary-text").textContent=[B_fmtDate(p.date), hasTime?B_fmtTime(p.time):"Birth time not provided", p.place].filter(Boolean).join("  ·  ");
       initReading(arr, meta, hasTime, p);
       zTrack("reading_complete",{module:"basic",via:zVia()});
-      rd.scrollIntoView({behavior:"smooth"});
+      requestAnimationFrame(()=>window.scrollTo({top:Math.max(0, mod.getBoundingClientRect().top+window.scrollY-16), behavior:"smooth"}));
     } else {
       R_payload=p;
       zTrack("reading_error",{module:"basic",reason:"empty_result"});
@@ -1983,6 +2101,7 @@ function R_showPanel(i){
   newP.classList.remove('p-in'); void newP.offsetWidth; newP.classList.add('p-in');
   R_$('R-navTitle').textContent=newP.dataset.name;
   const desc=R_$('R-navDesc'); if(desc) desc.textContent=newP.dataset.desc||"";
+  R_updateStepper();
   R_buildMenu();
   R_$('R-navCenter').classList.remove('menu-open');
   R_revealPanel(newP);
@@ -2051,6 +2170,69 @@ function R_animPersBody(host){
   secs.forEach((el,i)=>{ el.classList.remove('pers-in'); void el.offsetWidth; el.style.animationDelay=(base+i*STEP).toFixed(2)+'s'; el.classList.add('pers-in'); });
 }
 function R_step(dir){ R_showPanel(R_idx+dir); }
+/* stepper: Back / "2 / 5" / Next. Uses the same R_showPanel call as before, so reading_panel fires exactly as it did. */
+function R_stepGo(dir){
+  const k=R_idx+dir; if(k<0 || k>=R_panels.length) return;
+  R_showPanel(k); R_scrollNav();
+}
+function R_updateStepper(){
+  const n=R_panels.length, i=R_idx;
+  const st=R_$('R-navStep'); if(st) st.textContent="Section "+(i+1)+" of "+n;
+  const c=R_$('R-stCount'); if(c) c.textContent=(i+1)+" / "+n;
+  const pv=R_$('R-stPrev'); if(pv) pv.classList.toggle('st-hide', i===0);
+  const nx=R_$('R-stNext'); if(nx){ const last=(i>=n-1); nx.classList.toggle('st-hide', last); nx.textContent= last ? "" : ("Next: "+(R_panels[i+1].dataset.name||"")+" ›"); }
+}
+/* fixed to the bottom of the screen on a normal page; when the page is embedded in an auto-height frame
+   (taller than the screen) a fixed bar would sit at the very end, so it stays in the flow instead */
+let R_stepObs=null;
+function R_initStepper(){
+  const rd=R_$('reading'), bar=R_$('R-stepper'); if(!rd||!bar) return;
+  let framed=false; try{ framed=window.self!==window.top; }catch(e){ framed=true; }
+  const tallFrame = framed && window.innerHeight > ((window.screen&&screen.height)||900)*1.5;
+  bar.classList.toggle('st-fixed', !tallFrame);
+  document.body.classList.toggle('has-stepper', !tallFrame);
+  if(tallFrame || R_stepObs) return;
+  document.body.appendChild(bar);   // outside the animated reading container, so "fixed" means the screen
+  if('IntersectionObserver' in window){
+    R_stepObs=new IntersectionObserver(es=>{ es.forEach(e=>bar.classList.toggle('st-on', e.isIntersecting)); }, {rootMargin:"0px 0px -25% 0px"});
+    R_stepObs.observe(R_$('R-below'));
+  } else { bar.classList.add('st-on'); }
+}
+/* personality accordion */
+function R_acc(btn){
+  const sec=btn.closest('.acc'); if(!sec) return;
+  const open=!sec.classList.contains('open');
+  sec.classList.toggle('open', open); btn.setAttribute('aria-expanded', open?'true':'false');
+}
+/* chart: enlarge */
+function R_zoomOpen(){
+  const src=document.querySelector('#R-chartSlot .chart-in'); const ov=R_$('chartZoom'), host=R_$('chartZoomInner');
+  if(!src||!ov||!host) return;
+  const c=src.cloneNode(true); c.classList.remove('chart-in'); c.style.maxWidth='none'; c.style.width='100%';
+  host.innerHTML=""; host.appendChild(c); ov.classList.add('show');
+  const sc=R_$('chartZoomScroll'); sc.scrollLeft=Math.max(0,(sc.scrollWidth-sc.clientWidth)/2); sc.scrollTop=0;
+}
+function R_zoomClose(){ const ov=R_$('chartZoom'); if(ov){ ov.classList.remove('show'); R_$('chartZoomInner').innerHTML=""; } }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') R_zoomClose(); });
+/* plain-language names and one-line meanings for the placement pickers */
+const R_LABEL={MC:"Midheaven","North node":"North Node","South node":"South Node"};
+const R_GLOSS={
+  Sun:"The Sun is your core self — what you are here to grow into.",
+  Moon:"The Moon is your inner world — feelings, instincts, and what brings comfort.",
+  Mercury:"Mercury is how you think, learn, and speak.",
+  Venus:"Venus is how you love, and what you find beautiful and worthwhile.",
+  Mars:"Mars is your drive — how you act and go after what you want.",
+  Jupiter:"Jupiter is where you expand and look for meaning.",
+  Saturn:"Saturn is your sense of structure, responsibility, and long-term work.",
+  Uranus:"Uranus is where you break from convention and want freedom.",
+  Neptune:"Neptune is your imagination, ideals, and sense of the unseen.",
+  Pluto:"Pluto is where you go deep and change over time.",
+  "North node":"The North Node points to the direction you are growing toward.",
+  "South node":"The South Node is what already comes naturally to you.",
+  Chiron:"Chiron marks a sensitive theme that matures into insight.",
+  MC:"The Midheaven is your public role and the direction of your work."
+};
+function R_name(n){ return R_LABEL[n]||n; }
 function R_toggleMenu(e){ e.stopPropagation(); R_$('R-navCenter').classList.toggle('menu-open'); }
 function R_buildMenu(){
   const groups=[];
@@ -2155,16 +2337,17 @@ function R_balrow(items){ const mx=Math.max(...items.map(x=>x[1]));
   return '<div class="balrow">'+items.map(([k,v])=>`<div class="balchip ${v===mx?'dom':''}"><span class="bk">${k}</span><span class="bv">${v}%</span></div>`).join("")+'</div>'; }
 
 function R_buildPicker(pickerId,detailId,kind){
-  R_$(pickerId).innerHTML=R_pick.map((p,i)=>`<button class="pchip" data-i="${i}" onclick="R_select('${pickerId}','${detailId}','${kind}',${i})"><span class="pg">${R_GLYPH[p.planet]||"✦"}</span><span class="pn">${p.planet}</span></button>`).join("");
+  R_$(pickerId).innerHTML=R_pick.map((p,i)=>`<button class="pchip" data-i="${i}" onclick="R_select('${pickerId}','${detailId}','${kind}',${i})">${p.planet==="MC"?"":`<span class="pg">${R_GLYPH[p.planet]||"✦"}</span>`}<span class="pn">${R_name(p.planet)}</span></button>`).join("");
 }
 function R_select(pickerId,detailId,kind,i){
   const picker=R_$(pickerId);
   [...picker.querySelectorAll('.pchip')].forEach(b=>b.classList.toggle('active',Number(b.dataset.i)===i));
   const p=R_pick[i], el=R_$(detailId);
-  const label = kind==='sign' ? `${p.planet} in ${p.sign}` : `${p.planet} in the ${R_ord(p.house)} House`;
-  const head = kind==='sign'
-    ? `<div class="detail-head"><span class="dg">${R_GLYPH[p.planet]||'✦'}</span>${label} · ${R_deg(p.deg)}</div>`
-    : `<div class="detail-head"><span class="dg">${R_GLYPH[p.planet]||'✦'}</span>${label}</div>`;
+  const label = kind==='sign' ? `${R_name(p.planet)} in ${p.sign}` : `${R_name(p.planet)} in the ${R_ord(p.house)} House`;
+  const gloss = R_GLOSS[p.planet] ? `<p class="detail-sub">${R_GLOSS[p.planet]}</p>` : "";
+  const head = (kind==='sign'
+    ? `<div class="detail-head"><span class="dg">${p.planet==="MC"?"":(R_GLYPH[p.planet]||'✦')}</span>${label} · ${R_deg(p.deg)}</div>`
+    : `<div class="detail-head"><span class="dg">${p.planet==="MC"?"":(R_GLYPH[p.planet]||'✦')}</span>${label}</div>`) + gloss;
   const cta = R_placeCTA(kind, i);
   const token=++R_selToken[detailId];
   const path = kind==='sign' ? '/sign-report' : '/house-report';
@@ -2293,27 +2476,18 @@ function initReading(dataArr, meta, hasTime, payload){
   allPanels.forEach(p=>{ p.classList.remove('show','p-in','p-out'); const old=p.querySelector('.panel-next'); if(old) old.remove(); });
   R_panels=allPanels.filter(p=>R_hasTime || !p.hasAttribute('data-needs-time'));
   R_idx=0;
-  R_panels.forEach((p,k)=>{
-    if(k===R_panels.length-1) return;
-    const b=document.createElement('button'); b.className='panel-next';
-    b.innerHTML='<span class="pn-label">Next section</span><span class="pn-arrow">&gt;</span>';
-    b.onclick=()=>{ R_showPanel(k+1); R_scrollNav(); };
-    p.appendChild(b);
-  });
+  R_initStepper();
 
-  // ---- REAL data first (headline + pickers) ----
+  // ---- big three ----
   try{
-    if(meta) R_$('R-pd').innerHTML=
-      `<tr><td>Date of birth</td><td>${B_fmtDate(meta.dob)||"—"}</td></tr>`+
-      `<tr><td>Time of birth</td><td>${R_hasTime?(B_fmtTime(meta.time)||"—"):'<span class="needs-time">Not provided</span>'}</td></tr>`+
-      `<tr><td>Place of birth</td><td>${R_esc(meta.place||"—")}</td></tr>`;
-    const hd=[["Rising sign","Ascendant"],["Sun sign","Sun"],["Moon sign","Moon"]];
-    R_$('R-headline').innerHTML=hd.map(([label,key])=>{
-      if(key==="Ascendant" && !R_hasTime) return `<tr><td>${label}</td><td><span class="needs-time">Needs a birth time</span></td></tr>`;
-      const p=R_find(key); if(!p)return"";
-      const note=(key==="Moon" && !R_hasTime)?'<span class="dt-note">Can differ if the Moon changed signs that day</span>':'';
-      return `<tr><td>${label}</td><td><span class="signicon">${R_SIGN[p.sign]||"✦"}</span>${p.sign}${note}</td></tr>`; }).join("");
-  }catch(e){ console.error('headline',e); }
+    const B3=[["Sun","Sun","Your core self"],["Moon","Moon","Your inner world"],["Rising","Ascendant","How you come across"]];
+    R_$('R-big3').innerHTML=B3.map(([label,key,gloss])=>{
+      if(key==="Ascendant" && !R_hasTime)
+        return `<div class="b3 b3-off"><div class="b3-k">${label}</div><div class="b3-g gl">—</div><div class="b3-s">Needs a birth time</div><button class="b3-add" onclick="B_addTime()">Add time</button></div>`;
+      const p=R_find(key); if(!p) return "";
+      return `<div class="b3"><div class="b3-k">${label}</div><div class="b3-g gl">${R_SIGN[p.sign]||"✦"}</div><div class="b3-s">${p.sign}</div><div class="b3-d">${gloss}</div></div>`;
+    }).join("");
+  }catch(e){ console.error('big3',e); }
 
   try{
     R_$('signDetail').innerHTML=""; R_$('houseDetail').innerHTML="";
@@ -2332,8 +2506,9 @@ function initReading(dataArr, meta, hasTime, payload){
 }
 /* "Add my birth time": back to the form with the time fields ready */
 function B_addTime(){
+  const mod=document.getElementById("natal-basic"); if(mod) mod.classList.add("editing");
   const nt=document.getElementById("b-notime"); if(nt && nt.checked){ nt.checked=false; nt.dispatchEvent(new Event("change",{bubbles:true})); }
-  const f=document.getElementById("bf-time"); if(f) f.scrollIntoView({behavior:"smooth",block:"center"});
+  const f=document.getElementById("bf-time"); if(f) requestAnimationFrame(()=>f.scrollIntoView({behavior:"smooth",block:"center"}));
   const h=document.getElementById("b-t-h"); if(h) setTimeout(()=>{ try{ h.focus({preventScroll:true}); }catch(e){} },450);
 }
 
@@ -2364,8 +2539,9 @@ async function R_loadPersonality(){
       R_$('R-pers-sign').innerHTML=`<span class="signicon">${R_SIGN[a.sign]||"✦"}</span>${a.sign||""}`;
       R_$('R-pers-deg').textContent=R_deg(a.longitude||"");
       const po=[["Personality","personality"],["Career","career"],["Health","health"],["Finance","finance"],["Relationships","relationships"]];
-      R_$('R-pers-body').innerHTML=po.map(([l,k])=>
-        a.analysis[k] ? `<div class="pers-sec"><div class="pers-h">${l}</div>${k==="health"?'<p class="pers-note">Offered for reflection only — not medical or health advice.</p>':''}${R_paragraphs(a.analysis[k]).map(x=>`<p class="pers-p">${R_esc(x)}</p>`).join('')}</div>` : ''
+      R_$('R-pers-body').innerHTML=po.filter(([l,k])=>a.analysis[k]).map(([l,k],i)=>
+        `<div class="pers-sec acc${i===0?' open':''}"><button type="button" class="pers-h acc-h" aria-expanded="${i===0}" onclick="R_acc(this)"><span>${l}</span><span class="acc-caret"></span></button>`+
+        `<div class="acc-body">${k==="health"?'<p class="pers-note">Offered for reflection only — not medical or health advice.</p>':''}${R_paragraphs(a.analysis[k]).map(x=>`<p class="pers-p">${R_esc(x)}</p>`).join('')}</div></div>`
       ).join("");
       const pp=document.querySelector('#reading .panel[data-num="02"]');
       if(pp && pp.classList.contains('show')) R_animPersBody(R_$('R-pers-body'));
@@ -2498,7 +2674,7 @@ function R_loadInsights(){
 async function R_loadChart(){
   const slot=R_$('R-chartSlot');
   if(!slot) return;
-  slot.className='ph'; slot.style.border=''; slot.style.padding='';
+  slot.className='ph'; slot.style.border=''; slot.style.padding=''; slot.onclick=null; slot.style.cursor='';
   slot.innerHTML='Loading chart…';
   try{
     const d=await R_fetch('/chart');
@@ -2521,6 +2697,7 @@ async function R_loadChart(){
         _wheel.style.display='block'; _wheel.style.margin='0 auto';
         _wheel.style.width='100%'; _wheel.style.height='auto'; _wheel.style.maxWidth='100%';
       }
+      slot.onclick=R_zoomOpen; slot.style.cursor='zoom-in';
     }
     else if(b64){ slot.classList.remove('ph'); slot.style.border='none'; slot.style.padding='0'; slot.innerHTML=`<img alt="Natal chart" class="chart-in" style="display:block;width:100%;max-width:480px;height:auto;margin:0 auto;filter:invert(1) hue-rotate(180deg)" src="${/^data:/.test(b64)?b64:'data:image/png;base64,'+b64}">`; }
     else { slot.innerHTML=R_rawBox(d,'R_loadChart()'); }
