@@ -865,7 +865,7 @@ body.has-stepper .wrap{padding-bottom:150px}
 body.has-stepper .wrap{padding-bottom:120px}
 /* desktop landing: the form sits in the middle of the window instead of at the very top */
 @media (min-width:601px){
-  body.form-basic:not(.reading-on) #chart-area{padding-top:max(0px, calc(50vh - 372px))}
+  body.form-basic:not(.reading-on) #chart-area{padding-top:max(0px, calc(50vh - 300px))}
 }
 /* desktop: narrower reading column and slightly larger text, so lines are a comfortable length */
 @media (min-width:760px){
@@ -882,23 +882,34 @@ body.has-stepper .wrap{padding-bottom:120px}
 #reading .acc.open .acc-teaser{display:none}
 #reading .acc .acc-caret{margin-top:2px}
 #reading .acc.open .acc-caret{margin-top:8px}
+#reading .d-body{counter-reset:dsec}
+#reading .d-body > .acc{counter-increment:dsec}
+#reading .d-body > .acc .acc-l > span:first-child{display:flex;align-items:baseline}
+#reading .d-body > .acc .acc-l > span:first-child::before{content:counter(dsec, upper-roman) ".";flex:0 0 34px;color:var(--gold-deep);letter-spacing:.08em}
+#reading .d-body > .acc .acc-teaser{padding-left:34px}
 /* brand line with the same small star ornaments the guided intro uses */
 .brandbar{display:flex;align-items:center;justify-content:center;gap:18px;padding-left:0}
 .brandbar::before,.brandbar::after{content:"✦";font-size:8px;letter-spacing:0;color:var(--gold-deep)}
 @media (min-width:760px){
-  /* a narrower, single-column card with a fine inner frame and a gold hairline on top */
-  .module#natal-basic:not(.has-reading),.module#natal-basic.editing{max-width:600px;margin-left:auto;margin-right:auto;padding:50px 52px 42px;
+  /* a wide, low card (date and time side by side) with a fine inner frame and a gold hairline on top */
+  .module#natal-basic:not(.has-reading),.module#natal-basic.editing{max-width:780px;margin-left:auto;margin-right:auto;padding:36px 46px 30px;
     position:relative;background:#080808;border-color:#262626;box-shadow:0 30px 80px rgba(0,0,0,.55)}
-  .module#natal-basic:not(.has-reading)::before,.module#natal-basic.editing::before{content:"";position:absolute;left:52px;right:52px;top:-1px;height:1px;
+  .module#natal-basic:not(.has-reading)::before,.module#natal-basic.editing::before{content:"";position:absolute;left:46px;right:46px;top:-1px;height:1px;
     background:linear-gradient(90deg,transparent,var(--gold-deep) 30%,var(--gold) 50%,var(--gold-deep) 70%,transparent)}
-  .module#natal-basic:not(.has-reading)::after,.module#natal-basic.editing::after{content:"";position:absolute;inset:8px;border:1px solid var(--line-faint);pointer-events:none}
-  #natal-basic .module-head{margin-bottom:34px}
-  #natal-basic .module-head h2{font-size:36px;letter-spacing:.005em}
-  #natal-basic .form-grid{grid-template-columns:1fr;gap:26px}
-  #natal-basic .go{max-width:none;margin-top:34px;min-height:54px}
-  #natal-basic .form-privacy{margin-top:20px}
+  .module#natal-basic:not(.has-reading)::after,.module#natal-basic.editing::after{content:"";position:absolute;inset:7px;border:1px solid var(--line-faint);pointer-events:none}
+  #natal-basic .module-head{margin-bottom:24px}
+  #natal-basic .module-head h2{font-size:30px;letter-spacing:.005em}
+  #natal-basic .form-grid{grid-template-columns:1fr 1fr;gap:18px 26px}
+  #natal-basic .field{gap:7px}
+  #natal-basic .field > label:not(.notime){font-size:10.5px}
+  #natal-basic .field input[type=text],#natal-basic .sel{font-size:15px;min-height:44px;padding:9px 12px}
+  #natal-basic .sel{padding-right:28px}
+  #natal-basic .field label.notime{font-size:13px;min-height:34px}
+  #natal-basic .notime input{width:17px;height:17px}
+  #natal-basic .go{width:auto;min-width:340px;max-width:none;margin-top:24px;min-height:48px;font-size:11.5px}
+  #natal-basic .form-privacy{margin-top:14px;font-size:11.5px}
   .module#natal-basic.has-reading:not(.editing){max-width:660px;margin-left:auto;margin-right:auto}
-  .brandbar{margin-bottom:30px}
+  .brandbar{margin-bottom:26px;font-size:17px}
   body.form-basic:not(.reading-on){background:radial-gradient(ellipse 60% 55% at 50% 42%, rgba(212,175,55,.05), rgba(5,5,5,0) 70%) fixed, var(--bg)}
 }
 #reading .stone-line{display:block;margin:18px auto 0;padding:10px 8px;min-height:44px;background:none;border:none;cursor:pointer;
@@ -1055,14 +1066,12 @@ body.has-stepper .wrap{padding-bottom:120px}
 
   <div id="R-below" class="below revealed">
   <div class="big3" id="R-big3"></div>
-  <button type="button" class="stone-line" id="R-stoneLine" hidden></button>
   <p class="big3-note only-notime">Without a birth time, the Moon sign can differ if the Moon changed signs that day.</p>
   <div class="howto-wrap"><button class="howto-btn" onclick="R_openIntro()">How to read this</button></div>
   <!-- top navigation -->
   <div class="navbar" id="R-navbar">
     <button class="nav-arrow prev" onclick="R_step(-1)" aria-label="Previous">&lt;</button>
     <div class="nav-center" id="R-navCenter">
-      <div class="nav-step" id="R-navStep"></div>
       <div class="nav-current" onclick="R_toggleMenu(event)">
         <span class="nav-title" id="R-navTitle">Natal Chart</span>
         <span class="nav-caret"></span>
