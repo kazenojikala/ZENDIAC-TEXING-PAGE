@@ -882,6 +882,24 @@ body.has-stepper .wrap{padding-bottom:120px}
 #reading .acc.open .acc-teaser{display:none}
 #reading .acc .acc-caret{margin-top:2px}
 #reading .acc.open .acc-caret{margin-top:8px}
+.howto-fab{position:fixed;right:0;top:50%;z-index:45;transform:translateY(-50%);writing-mode:vertical-rl;
+  background:#0a0a0a;border:1px solid var(--line);border-right:none;color:var(--label);cursor:pointer;
+  font-family:var(--sans);font-size:10px;letter-spacing:.2em;text-transform:uppercase;padding:14px 7px;line-height:1;
+  opacity:0;visibility:hidden;transition:opacity .35s ease,visibility 0s linear .35s,color .25s,border-color .25s}
+body.has-stepper.rd-inview .howto-fab{opacity:1;visibility:visible;transition:opacity .35s ease,visibility 0s,color .25s,border-color .25s}
+.howto-fab:hover,.howto-fab[aria-expanded="true"]{color:var(--gold);border-color:var(--gold-deep)}
+.howto-pop{position:fixed;right:40px;top:50%;z-index:46;transform:translateY(-50%);width:min(380px, calc(100vw - 60px));max-height:min(70vh,560px);overflow:auto;
+  background:#0a0a0a;border:1px solid var(--line);box-shadow:0 24px 60px rgba(0,0,0,.6);padding:24px 24px 18px;
+  opacity:0;visibility:hidden;transition:opacity .4s ease,visibility 0s linear .4s}
+.howto-pop.show{opacity:1;visibility:visible;transition:opacity .4s ease,visibility 0s}
+.hp-h{font-family:var(--serif);font-size:20px;font-weight:300;color:var(--gold-mute);margin:18px 0 12px}
+.hp-h:first-child{margin-top:0}
+.hp-p{font-family:var(--serif);font-size:16px;line-height:1.55;color:var(--body);margin:0 0 11px}
+.hp-p b{color:var(--ink);font-weight:500}
+body.has-stepper #reading .howto-wrap{display:none}
+body.has-stepper #reading .big3{margin-bottom:28px}
+body.has-stepper #reading .big3-note{margin:-14px auto 26px}
+@media (max-width:600px){ .howto-fab{font-size:9.5px;padding:12px 5px} .howto-pop{right:30px} }
 #reading .d-body{counter-reset:dsec}
 #reading .d-body > .acc{counter-increment:dsec}
 #reading .d-body > .acc .acc-l > span:first-child{display:flex;align-items:baseline}
@@ -973,6 +991,14 @@ body.has-stepper .wrap{padding-bottom:120px}
 .cz-inner{width:min(calc(100vw - 16px), calc(100vh - 20px));width:min(calc(100vw - 16px), calc(100dvh - 20px));max-width:none;margin:0;padding:0}
 .cz-hint{display:none}
 
+@media (max-width:600px){
+  #reading .picker{display:flex;grid-template-columns:none;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none;margin:12px -18px 4px;padding:0 18px 2px;scroll-padding:0 18px;
+    -webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}
+  #reading .picker::-webkit-scrollbar{display:none}
+  #reading .pchip{flex:0 0 auto;min-height:42px;padding:9px 14px}
+  #reading .pchip .pn{white-space:nowrap}
+}
 </style>
 <!-- Route A: offline timezone lookup (lat/lon -> IANA zone), free & keyless.
      Used only in LIVE mode to derive DivineAPI's tzone from Photon's coordinates.
@@ -1082,8 +1108,34 @@ body.has-stepper .wrap{padding-bottom:120px}
     <button class="nav-arrow next" onclick="R_step(1)" aria-label="Next">&gt;</button>
   </div>
 
+  <!-- 04 SIGN PLACEMENTS -->
+  <section class="panel show" data-name="Sign Placements" data-num="04" data-group="Start here" data-desc="Where each planet sits by sign — its flavor and tone.">
+    <div class="picker" id="signPicker"></div>
+    <div class="detail" id="signDetail"></div>
+  </section>
+
+  <!-- 02 PERSONALITY -->
+  <section class="panel" data-needs-time data-name="Personality" data-num="02" data-group="Start here" data-desc="How your inner forces shape love, work, wellbeing, and money.">
+    <div class="pers-tabs">
+      <div class="pers-tab"><span class="pt-k">Rising sign</span><span class="pt-v" id="R-pers-sign"></span></div>
+      <div class="pers-tab"><span class="pt-k">Degree</span><span class="pt-v" id="R-pers-deg"></span></div>
+    </div>
+    <div id="R-pers-body"></div>
+  </section>
+
+  <!-- 05 HOUSE PLACEMENTS -->
+  <section class="panel" data-needs-time data-name="House Placements" data-num="05" data-group="Start here" data-desc="Where each planet works — the life area its house colors.">
+    <div class="picker" id="housePicker"></div>
+    <div class="detail" id="houseDetail"></div>
+  </section>
+
+  <!-- 03 NATAL INSIGHTS -->
+  <section class="panel" data-name="Natal Insights" data-num="03" data-group="Go deeper" data-desc="Your chart's balance — elements, modes, and hemispheres.">
+    <div id="R-insights"></div>
+  </section>
+
   <!-- 01 NATAL CHART -->
-  <section class="panel show" data-name="Natal Chart" data-num="01" data-group="Foundational" data-desc="The whole sky at your birth — the wheel and your headline signs.">
+  <section class="panel" data-name="Natal Chart" data-num="01" data-group="Go deeper" data-desc="The whole sky at your birth — the wheel and your headline signs.">
     <div class="ph" id="R-chartSlot">Chart wheel image
       <small>From DivineAPI's Natal Wheel Chart endpoint (returns an SVG). We'll wire it next — this box marks where it appears.</small>
     </div>
@@ -1103,32 +1155,6 @@ body.has-stepper .wrap{padding-bottom:120px}
       <p>Your Rising sign, Personality reading, and House placements depend on the exact time of birth, so they are left out of this reading.</p>
       <button onclick="B_addTime()">Add my birth time</button>
     </div>
-  </section>
-
-  <!-- 02 PERSONALITY -->
-  <section class="panel" data-needs-time data-name="Personality" data-num="02" data-group="Foundational" data-desc="How your inner forces shape love, work, wellbeing, and money.">
-    <div class="pers-tabs">
-      <div class="pers-tab"><span class="pt-k">Rising sign</span><span class="pt-v" id="R-pers-sign"></span></div>
-      <div class="pers-tab"><span class="pt-k">Degree</span><span class="pt-v" id="R-pers-deg"></span></div>
-    </div>
-    <div id="R-pers-body"></div>
-  </section>
-
-  <!-- 03 NATAL INSIGHTS -->
-  <section class="panel" data-name="Natal Insights" data-num="03" data-group="Foundational" data-desc="Your chart's balance — elements, modes, and hemispheres.">
-    <div id="R-insights"></div>
-  </section>
-
-  <!-- 04 SIGN PLACEMENTS -->
-  <section class="panel" data-name="Sign Placements" data-num="04" data-group="Advanced" data-desc="Where each planet sits by sign — its flavor and tone.">
-    <div class="picker" id="signPicker"></div>
-    <div class="detail" id="signDetail"></div>
-  </section>
-
-  <!-- 05 HOUSE PLACEMENTS -->
-  <section class="panel" data-needs-time data-name="House Placements" data-num="05" data-group="Advanced" data-desc="Where each planet works — the life area its house colors.">
-    <div class="picker" id="housePicker"></div>
-    <div class="detail" id="houseDetail"></div>
   </section>
 
   <div class="stepper" id="R-stepper" role="navigation" aria-label="Reading sections">
@@ -1171,6 +1197,8 @@ body.has-stepper .wrap{padding-bottom:120px}
 </main>
 
 <div id="toast"></div>
+<button type="button" class="howto-fab" id="R-howFab" aria-expanded="false" aria-controls="R-howPop" onclick="R_howToggle(event)">How to read</button>
+<div class="howto-pop" id="R-howPop" role="dialog" aria-label="How to read this"></div>
 <div class="chart-zoom" id="chartZoom">
   <span class="cz-hint">Drag to look around</span>
   <button class="cz-close" onclick="R_zoomClose()" aria-label="Close">&times;</button>
@@ -2340,7 +2368,7 @@ function R_initStepper(){
   if(tallFrame || R_stepObs) return;
   document.body.appendChild(bar);   // outside the animated reading container, so "fixed" means the screen
   if('IntersectionObserver' in window){
-    R_stepObs=new IntersectionObserver(es=>{ es.forEach(e=>bar.classList.toggle('st-on', e.isIntersecting)); }, {rootMargin:"0px 0px -25% 0px"});
+    R_stepObs=new IntersectionObserver(es=>{ es.forEach(e=>{ bar.classList.toggle('st-on', e.isIntersecting); document.body.classList.toggle('rd-inview', e.isIntersecting); if(!e.isIntersecting) R_howClose(); }); }, {rootMargin:"0px 0px -25% 0px"});
     R_stepObs.observe(R_$('R-below'));
   } else { bar.classList.add('st-on'); }
 }
@@ -2366,7 +2394,8 @@ const R_NEXT={
   "Personality":"How you come across",
   "Natal Insights":"What your chart is made of",
   "Sign Placements":"Your planets, sign by sign",
-  "House Placements":"Where it all plays out"
+  "House Placements":"Where it all plays out",
+  "Natal Chart":"Your full birth chart"
 };
 function R_teaser(t){ const ss=R_splitSentences(t); return ss.length?ss[0]:""; }
 /* Personality: when the reader scrolls down to the next collapsed heading, it opens by itself.
@@ -2480,18 +2509,14 @@ function R_navpick(k){ R_accHold=Date.now()+1500; R_showPanel(k); }
 function R_scrollNav(){ requestAnimationFrame(()=>{ const nb=R_$('R-navbar'); const y=nb.getBoundingClientRect().top+window.scrollY-26; window.scrollTo({top:y,behavior:'smooth'}); }); }
 
 /* ---- guided intro modal ---- */
-const R_STAGE_F={ title:"Foundational · Start here", paras:[
-  "The first three readings show the <b>shape of you at a glance</b>.",
-  "<b>Natal Chart</b> is the whole sky at the moment you were born — the wheel, and your <b>headline signs</b>.",
-  "<b>Personality</b> turns your rising sign into <b>how you come across</b>, and how you move through the world.",
-  "<b>Natal Insights</b> weighs the balance of <b>elements, modes, and hemispheres</b> — the underlying temperature of your chart.",
-  "Read together, these three answer one simple question — <b>\u201cwhat am I like?\u201d</b> — and give you the language you'll need for the detail that follows."
+const R_STAGE_F={ title:"Start here", paras:[
+  "<b>Sign Placements</b> — where each planet sat when you were born. Your Sun comes first: the part of you you'll likely recognize.",
+  "<b>Personality</b> — your Rising sign, and how you come across.",
+  "<b>House Placements</b> — the area of life where each planet plays out."
 ]};
-const R_STAGE_A={ title:"Advanced · Go deeper", paras:[
-  "Once the basics make sense, the last two readings show the <b>mechanics of how it all works</b>.",
-  "<b>Sign Placements</b> reveal the <b>flavor</b> each planet carries — how a given drive tends to express itself.",
-  "<b>House Placements</b> reveal <b>where that energy lands</b> — the exact area of life it colors and shapes.",
-  "This is where general traits become <b>specific to you</b>: not just what you're like, but <b>how it actually plays out</b>, day to day."
+const R_STAGE_A={ title:"Go deeper", paras:[
+  "<b>Natal Insights</b> — the balance of elements and modes in your chart.",
+  "<b>Natal Chart</b> — the full wheel. Open the key under it to read the symbols."
 ]};
 function R_readDelay(t){ const w=t.replace(/<[^>]+>/g,"").trim().split(/\s+/).length; return Math.min(2100,Math.max(480,Math.round(w*75))); }
 function R_clearTimers(){ R_timers.forEach(t=>clearTimeout(t)); R_timers=[]; }
@@ -2508,6 +2533,21 @@ function R_revealStage(host, stage, onDone){
   });
   R_timers.push(setTimeout(()=>{ onDone&&onDone(); }, delay));
 }
+/* "How to read" tab */
+function R_howFill(){
+  const p=R_$('R-howPop'); if(!p || p.dataset.ready) return;
+  const part=st=>`<div class="hp-h">${st.title}</div>`+st.paras.map(x=>`<p class="hp-p">${x}</p>`).join("");
+  p.innerHTML=part(R_STAGE_F)+part(R_STAGE_A); p.dataset.ready="1";
+}
+function R_howClose(){ const p=R_$('R-howPop'), b=R_$('R-howFab'); if(p) p.classList.remove('show'); if(b) b.setAttribute('aria-expanded','false'); }
+function R_howToggle(e){
+  if(e) e.stopPropagation();
+  const p=R_$('R-howPop'), b=R_$('R-howFab'); if(!p) return;
+  if(p.classList.contains('show')){ R_howClose(); return; }
+  R_howFill(); p.scrollTop=0; p.classList.add('show'); if(b) b.setAttribute('aria-expanded','true');
+}
+document.addEventListener('click', e=>{ const p=R_$('R-howPop'); if(p && p.classList.contains('show') && !p.contains(e.target)) R_howClose(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') R_howClose(); });
 function R_settleReading(){ const rd=R_$('reading'); if(rd) rd.classList.remove('result-appear'); }
 document.addEventListener('animationend', e=>{ if(e.target && e.target.id==='reading' && e.animationName==='resultAppear') R_settleReading(); });
 function R_openIntro(){
@@ -2567,6 +2607,8 @@ function R_buildPicker(pickerId,detailId,kind){
 function R_select(pickerId,detailId,kind,i){
   const picker=R_$(pickerId);
   [...picker.querySelectorAll('.pchip')].forEach(b=>b.classList.toggle('active',Number(b.dataset.i)===i));
+  const ac=picker.querySelector('.pchip.active');
+  if(ac && picker.scrollWidth>picker.clientWidth+1) picker.scrollTo({left:Math.max(0, ac.offsetLeft-picker.offsetLeft-40), behavior:'smooth'});
   const p=R_pick[i], el=R_$(detailId);
   const label = kind==='sign' ? `${R_name(p.planet)} in ${p.sign}` : `${R_name(p.planet)} in the ${R_ord(p.house)} House`;
   const kwList = kind==='sign' ? R_SIGN_KW[p.sign] : R_HOUSE_KW[p.house];
@@ -2715,7 +2757,8 @@ function initReading(dataArr, meta, hasTime, payload){
       if(key==="Ascendant" && !R_hasTime)
         return `<div class="b3 b3-off"><div class="b3-k">${label}</div><div class="b3-g gl">—</div><div class="b3-s">Needs a birth time</div><button class="b3-add" onclick="B_addTime()">Add time</button></div>`;
       const p=R_find(key); if(!p) return "";
-      return `<div class="b3"><div class="b3-k">${label}</div><div class="b3-g gl">${R_SIGN[p.sign]||"✦"}</div><div class="b3-s">${p.sign}</div><div class="b3-d">${gloss}</div></div>`;
+      const kw=(R_SIGN_KW[p.sign]||[]).join(" · ");
+      return `<div class="b3"><div class="b3-k">${label}</div><div class="b3-g gl">${R_SIGN[p.sign]||"✦"}</div><div class="b3-s">${p.sign}</div><div class="b3-d">${kw||gloss}</div></div>`;
     }).join("");
   }catch(e){ console.error('big3',e); }
   try{
