@@ -991,6 +991,7 @@ body.has-stepper #reading .big3-note{margin:-14px auto 26px}
 .cz-inner{width:min(calc(100vw - 16px), calc(100vh - 20px));width:min(calc(100vw - 16px), calc(100dvh - 20px));max-width:none;margin:0;padding:0}
 .cz-hint{display:none}
 
+#reading .detail-head + .d-body > .acc:first-child{border-top:none}
 @media (max-width:600px){
   #reading .picker{display:flex;grid-template-columns:none;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;
     scrollbar-width:none;margin:12px -18px 4px;padding:0 18px 2px;scroll-padding:0 18px;
@@ -2612,7 +2613,8 @@ function R_select(pickerId,detailId,kind,i){
   const p=R_pick[i], el=R_$(detailId);
   const label = kind==='sign' ? `${R_name(p.planet)} in ${p.sign}` : `${R_name(p.planet)} in the ${R_ord(p.house)} House`;
   const kwList = kind==='sign' ? R_SIGN_KW[p.sign] : R_HOUSE_KW[p.house];
-  const kw = kwList ? `<p class="detail-kw">${kwList.map(R_esc).join(' <i>·</i> ')}</p>` : "";
+  const dupe = kind==='sign' && (p.planet==="Sun" || p.planet==="Moon");   // same words as the three cells above
+  const kw = (kwList && !dupe) ? `<p class="detail-kw">${kwList.map(R_esc).join(' <i>·</i> ')}</p>` : "";
   const g = R_GLOSS[p.planet]||"";
   const ttl = kind==='sign' ? `${label} · ${R_deg(p.deg)}` : label;
   const head = `<div class="detail-head${g?' has-gloss':''}"${g?' role="button" tabindex="0" aria-expanded="false" onclick="R_glossToggle(this)"':''}>`
