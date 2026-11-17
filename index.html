@@ -865,7 +865,7 @@ body.has-stepper .wrap{padding-bottom:150px}
 body.has-stepper .wrap{padding-bottom:120px}
 /* desktop landing: the form sits in the middle of the window instead of at the very top */
 @media (min-width:601px){
-  body.entry-basic:not(.reading-on) #chart-area{padding-top:max(0px, calc(50vh - 330px))}
+  body.form-basic:not(.reading-on) #chart-area{padding-top:max(0px, calc(50vh - 372px))}
 }
 /* desktop: narrower reading column and slightly larger text, so lines are a comfortable length */
 @media (min-width:760px){
@@ -882,6 +882,35 @@ body.has-stepper .wrap{padding-bottom:120px}
 #reading .acc.open .acc-teaser{display:none}
 #reading .acc .acc-caret{margin-top:2px}
 #reading .acc.open .acc-caret{margin-top:8px}
+/* brand line with the same small star ornaments the guided intro uses */
+.brandbar{display:flex;align-items:center;justify-content:center;gap:18px;padding-left:0}
+.brandbar::before,.brandbar::after{content:"✦";font-size:8px;letter-spacing:0;color:var(--gold-deep)}
+@media (min-width:760px){
+  /* a narrower, single-column card with a fine inner frame and a gold hairline on top */
+  .module#natal-basic:not(.has-reading),.module#natal-basic.editing{max-width:600px;margin-left:auto;margin-right:auto;padding:50px 52px 42px;
+    position:relative;background:#080808;border-color:#262626;box-shadow:0 30px 80px rgba(0,0,0,.55)}
+  .module#natal-basic:not(.has-reading)::before,.module#natal-basic.editing::before{content:"";position:absolute;left:52px;right:52px;top:-1px;height:1px;
+    background:linear-gradient(90deg,transparent,var(--gold-deep) 30%,var(--gold) 50%,var(--gold-deep) 70%,transparent)}
+  .module#natal-basic:not(.has-reading)::after,.module#natal-basic.editing::after{content:"";position:absolute;inset:8px;border:1px solid var(--line-faint);pointer-events:none}
+  #natal-basic .module-head{margin-bottom:34px}
+  #natal-basic .module-head h2{font-size:36px;letter-spacing:.005em}
+  #natal-basic .form-grid{grid-template-columns:1fr;gap:26px}
+  #natal-basic .go{max-width:none;margin-top:34px;min-height:54px}
+  #natal-basic .form-privacy{margin-top:20px}
+  .module#natal-basic.has-reading:not(.editing){max-width:660px;margin-left:auto;margin-right:auto}
+  .brandbar{margin-bottom:30px}
+  body.form-basic:not(.reading-on){background:radial-gradient(ellipse 60% 55% at 50% 42%, rgba(212,175,55,.05), rgba(5,5,5,0) 70%) fixed, var(--bg)}
+}
+#reading .stone-line{display:block;margin:18px auto 0;padding:10px 8px;min-height:44px;background:none;border:none;cursor:pointer;
+  font-family:var(--sans);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-mute);line-height:1.5;transition:color .25s}
+#reading .stone-line[hidden]{display:none}
+#reading .stone-line:hover{color:var(--gold)}
+#reading .stone-line .sl-arw{font-family:var(--serif);font-size:17px;letter-spacing:0;margin-left:4px}
+#reading .howto-wrap{margin-top:0}
+#reading .place-cta{animation:none;color:var(--label);border-color:var(--line);background:transparent;line-height:1.5;text-align:center;
+  transition:color .25s,border-color .25s}
+#reading .place-cta:hover{color:var(--ink);border-color:var(--gold-deep);background:transparent}
+.xtal-h{line-height:1.25}
 #reading .acc:first-child .acc-h,#reading .d-sec.acc:first-child .acc-h{margin:0}
 #reading .acc .balrow{margin-top:2px}
 #reading .d-body > .acc:last-of-type{border-bottom:1px solid var(--line-faint)}
@@ -1026,6 +1055,7 @@ body.has-stepper .wrap{padding-bottom:120px}
 
   <div id="R-below" class="below revealed">
   <div class="big3" id="R-big3"></div>
+  <button type="button" class="stone-line" id="R-stoneLine" hidden></button>
   <p class="big3-note only-notime">Without a birth time, the Moon sign can differ if the Moon changed signs that day.</p>
   <div class="howto-wrap"><button class="howto-btn" onclick="R_openIntro()">How to read this</button></div>
   <!-- top navigation -->
@@ -1391,6 +1421,7 @@ function goToModule(mode){
 function finishIntro(mode){
   const intro=document.getElementById("intro");
   document.body.classList.add("chart-on");
+  document.body.classList.toggle("form-basic", mode!=="transit");
   document.getElementById("chart-area").classList.add("show");
   const basic=document.getElementById("natal-basic");
   const transit=document.getElementById("natal-transit");
@@ -1403,7 +1434,8 @@ function finishIntro(mode){
   const sk=document.getElementById("skip"); if(sk) sk.style.display="none";
   if(target){
     // snap the viewport onto the module first (no smooth scroll fighting the animation)
-    const y=target.getBoundingClientRect().top + window.scrollY - 20;
+    // the basic form starts at the top of the page (brand line + form, centred on desktop); transit keeps its original position
+    const y=(mode==="transit") ? (target.getBoundingClientRect().top + window.scrollY - 20) : 0;
     window.scrollTo({ top:y, behavior:"auto" });
     // then let it fade + drift in gently, in place
     target.classList.remove("module-reveal"); void target.offsetWidth; target.classList.add("module-reveal");
@@ -1417,7 +1449,7 @@ function replayGuide(){
   intro.style.display=""; intro.classList.remove("collapsed");
   document.getElementById("skip").style.display="";
   conv.innerHTML=""; pick=null; ensureArt(function(){ renderBeat(0); });
-  document.body.classList.remove("chart-on");
+  document.body.classList.remove("chart-on","form-basic","reading-on");
   window.scrollTo({top:0, behavior:"smooth"});
 }
 
@@ -2579,7 +2611,8 @@ function R_placeCTA(kind, i){
   const p=R_pick[i]; if(!p) return "";
   const items = kind==='sign' ? cmLookupSign(p.planet,p.sign) : cmLookupHouse(p.planet,p.house);
   if(!items.length) return "";
-  return `<a class="place-cta" href="#" onclick="cmPlaceClick('${kind}',${i});return false">Go deeper on this placement <span class="cta-arw">→</span></a>`;
+  const ctaText = items.length===1 ? ("Explore "+R_esc(items[0].en)) : "Stones for this placement";
+  return `<a class="place-cta" href="#" onclick="cmPlaceClick('${kind}',${i});return false">${ctaText} <span class="cta-arw">→</span></a>`;
 }
 const R_selToken={signDetail:0,houseDetail:0};
 /* planet name → API path value (lowercase, no spaces): "North node" → "northnode" */
@@ -2676,6 +2709,17 @@ function initReading(dataArr, meta, hasTime, payload){
       return `<div class="b3"><div class="b3-k">${label}</div><div class="b3-g gl">${R_SIGN[p.sign]||"✦"}</div><div class="b3-s">${p.sign}</div><div class="b3-d">${gloss}</div></div>`;
     }).join("");
   }catch(e){ console.error('big3',e); }
+  try{
+    const sl=R_$('R-stoneLine'), si=R_pick.findIndex(p=>p.planet==="Sun");
+    const its = si>=0 ? cmLookupSign("Sun", R_pick[si].sign) : [];
+    if(sl){
+      sl.hidden = !its.length;
+      if(its.length){
+        sl.innerHTML = (its.length===1 ? ("Stone for your "+R_esc(R_pick[si].sign)+" Sun: "+R_esc(its[0].en)) : ("Stones for your "+R_esc(R_pick[si].sign)+" Sun")) + ' <span class="sl-arw">→</span>';
+        sl.onclick=()=>cmPlaceClick('sign', si);
+      }
+    }
+  }catch(e){ console.error('stone line',e); }
 
   try{
     R_$('signDetail').innerHTML=""; R_$('houseDetail').innerHTML="";
@@ -2942,6 +2986,8 @@ async function R_loadChart(){
     const seg=(location.pathname||"").toLowerCase().replace(/\/+$/,"").split("/").pop();
     const direct=(q.get("start")==="basic" || (!q.get("start") && seg==="basic"));
     if(q.get("read")==="1" || direct) document.body.classList.add("entry-basic");
+    // a reload must not jump back to wherever the page was scrolled before
+    try{ if("scrollRestoration" in history) history.scrollRestoration="manual"; }catch(e){}
     if(direct && q.get("read")!=="1") window.scrollTo(0,0);   // keep the brand line and headline on the first screen
   }catch(e){}
 })();
@@ -2973,7 +3019,7 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ const ov=R_$('R-i
 <div class="xtal-overlay" id="xtalOverlay" onclick="if(event.target===this)cmClosePopup()">
   <div class="xtal-box">
     <button class="xtal-close" onclick="cmClosePopup()" aria-label="Close">&times;</button>
-    <div class="xtal-h">Your stone match</div>
+    <div class="xtal-h" id="xtalH">Traditionally paired</div>
     <div class="xtal-sub" id="xtalSub"></div>
     <div class="xtal-list" id="xtalList"></div>
   </div>
@@ -3004,9 +3050,9 @@ function cmShowPopup(items, label, kindWord){
   const sub=document.getElementById("xtalSub"), list=document.getElementById("xtalList"), ov=document.getElementById("xtalOverlay");
   if(!ov) return;
   const what = kindWord || "placement";
-  sub.textContent = label
-    ? ("For "+label+" — choose a stone and visit its product page to learn what this "+what+" means.")
-    : ("Choose a stone and visit its product page to learn what it means.");
+  const hEl=document.getElementById("xtalH");
+  if(hEl) hEl.textContent = (label && what!=="transit") ? ("Stones for "+label) : "Stones for this "+what;
+  sub.textContent = "Traditionally associated — offered for reflection.";
   list.innerHTML = items.map(function(x){
     return '<a class="xtal-item" href="'+x.url+'" target="_blank" rel="noopener" onclick="zTrack(\'crystal_click\',{stone:this.getAttribute(\'data-stone\'),placement:\''+String(label||"").replace(/['"\\<>]/g,"")+'\',kind:\''+what+'\',choices:'+items.length+'});cmClosePopup()" data-stone="'+String(x.en).replace(/"/g,"&quot;")+'">'
       +'<span class="xi-name">'+x.en+'</span>'
