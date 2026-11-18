@@ -992,6 +992,46 @@ body.has-stepper #reading .big3-note{margin:-14px auto 26px}
 .cz-hint{display:none}
 
 #reading .detail-head + .d-body > .acc:first-child{border-top:none}
+#reading .stones-row{display:flex;align-items:center;justify-content:space-between;gap:16px 32px;flex-wrap:wrap;margin:64px 0 0;
+  opacity:0;transform:translateY(14px);transition:opacity 1s ease,transform 1s ease}
+#reading .stones-row.in{opacity:1;transform:none}
+#reading .stones-row[hidden]{display:none}
+#reading .sr-txt{min-width:0}
+#reading .sr-h{font-family:var(--serif);font-size:21px;font-weight:400;line-height:1.25;color:var(--gold-mute)}
+#reading .sr-sub{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--muted);margin-top:4px}
+#reading .sr-list{display:flex;flex-wrap:wrap;gap:8px}
+#reading .sr-item{display:inline-flex;align-items:center;gap:10px;min-height:42px;padding:9px 15px;border:1px solid var(--line);
+  font-family:var(--serif);font-size:16.5px;color:var(--ink);text-decoration:none;transition:border-color .25s,color .25s}
+#reading .sr-item:hover{border-color:var(--gold-deep);color:var(--gold)}
+#reading .sr-arw{font-size:14px;color:var(--gold-mute)}
+@media (max-width:600px){
+  #reading .stones-row{flex-direction:column;align-items:stretch;margin-top:56px;text-align:center}
+  #reading .sr-list{justify-content:center}
+}
+@media (prefers-reduced-motion:reduce){ #reading .stones-row{transition:none;opacity:1;transform:none} }
+#reading .stones-row{display:block;text-align:center;border:1px solid var(--line-soft);background:#090909;padding:26px 24px 22px;margin-top:64px}
+#reading .sr-h{font-family:var(--sans);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--body)}
+#reading .sr-sub{font-size:13px;margin-top:6px;color:var(--muted)}
+#reading .sr-list{justify-content:center;gap:0;margin-top:16px}
+#reading .sr-item{border:none;padding:6px 18px;min-height:44px;font-size:18px;color:var(--ink);position:relative}
+#reading .sr-item + .sr-item::before{content:"";position:absolute;left:0;top:28%;bottom:28%;width:1px;background:var(--line)}
+#reading .sr-arw{color:var(--muted);transition:transform .25s,color .25s}
+#reading .sr-item:hover{color:var(--ink)}
+#reading .sr-item:hover .sr-arw{color:var(--gold-mute);transform:translateX(3px)}
+@media (max-width:600px){
+  #reading .stones-row{padding:24px 16px 14px;margin-top:56px}
+  #reading .sr-list{flex-direction:column;align-items:center;margin-top:10px}
+  #reading .sr-item{padding:8px 12px}
+  #reading .sr-item + .sr-item::before{display:none}
+}
+#reading .chart-key .acc-body{transition:grid-template-rows .9s ease,opacity .5s ease,visibility 0s linear .9s}
+#reading .chart-key.open .acc-body{transition:grid-template-rows .9s ease,opacity .9s ease .2s,visibility 0s}
+#reading #R-pers-body > .acc > .acc-h,#reading #R-insights > .acc > .acc-h,#reading .d-body > .acc > .acc-h{transition:opacity .6s ease}
+#reading #R-pers-body > .acc:not(.open) > .acc-h,#reading #R-insights > .acc:not(.open) > .acc-h,#reading .d-body > .acc:not(.open) > .acc-h{opacity:.35}
+@media (hover:hover){
+  #reading #R-pers-body > .acc:not(.open) > .acc-h:hover,#reading #R-insights > .acc:not(.open) > .acc-h:hover,#reading .d-body > .acc:not(.open) > .acc-h:hover{opacity:.7}
+}
+@media (prefers-reduced-motion:reduce){ #reading #R-pers-body > .acc > .acc-h,#reading #R-insights > .acc > .acc-h,#reading .d-body > .acc > .acc-h{transition:none} }
 @media (max-width:600px){
   #reading .picker{display:flex;grid-template-columns:none;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;
     scrollbar-width:none;margin:12px -18px 4px;padding:0 18px 2px;scroll-padding:0 18px;
@@ -1177,6 +1217,7 @@ body.has-stepper #reading .big3-note{margin:-14px auto 26px}
     </div>
     <button class="sec-next" id="R-secNext" type="button" onclick="R_stepGo(1)"><span class="sn-k">Next:</span><span class="sn-t" id="R-secNextT"></span><span class="pn-arrow">›</span></button>
   </div>
+  <div class="stones-row" id="R-stones" hidden></div>
   </div><!-- /below -->
 
   <!-- guided intro modal -->
@@ -2273,6 +2314,7 @@ function R_showPanel(i){
   R_$('R-navTitle').textContent=newP.dataset.name;
   const desc=R_$('R-navDesc'); if(desc) desc.textContent=newP.dataset.desc||"";
   R_updateStepper();
+  R_stoneSeen={}; R_stonesUpdate();
   R_buildMenu();
   R_$('R-navCenter').classList.remove('menu-open');
   R_accReset(newP);
@@ -2408,6 +2450,15 @@ function R_accAuto(){
   const y=window.scrollY, down=y>R_accY+2; R_accY=y; if(!down) return;
   if(Date.now()<R_accHold) return;            // the page is moving by itself (section change) or a section has just opened
   const panel=document.querySelector('#reading .panel.show'); if(!panel) return;
+  const key=panel.querySelector(':scope > .chart-key');
+  if(key && !key.classList.contains('open') && !key.dataset.userClosed){
+    const kt=key.getBoundingClientRect().top;
+    if(kt > 0 && kt < window.innerHeight*0.58){
+      R_accHold=Date.now()+900; key.classList.add('open');
+      const kh=key.querySelector('.acc-h'); if(kh) kh.setAttribute('aria-expanded','true');
+      return;
+    }
+  }
   for(const host of panel.querySelectorAll(R_ACC_HOSTS)){
     if(!host.offsetParent) continue;
     const secs=[...host.children].filter(el=>el.classList.contains('acc'));
@@ -2430,6 +2481,7 @@ function R_accAuto(){
    so they unfold again as the reader scrolls */
 function R_accReset(panel){
   if(!panel) return;
+  panel.querySelectorAll(':scope > .chart-key').forEach(k=>{ k.classList.remove('open'); delete k.dataset.userClosed; const h=k.querySelector('.acc-h'); if(h) h.setAttribute('aria-expanded','false'); });
   panel.querySelectorAll(R_ACC_HOSTS).forEach(host=>{
     [...host.children].filter(el=>el.classList.contains('acc')).forEach((sc,i)=>{
       sc.classList.toggle('open', i===0); delete sc.dataset.userClosed;
@@ -2549,6 +2601,34 @@ function R_howToggle(e){
 }
 document.addEventListener('click', e=>{ const p=R_$('R-howPop'); if(p && p.classList.contains('show') && !p.contains(e.target)) R_howClose(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') R_howClose(); });
+/* stones row: which stones are traditionally paired with the planet being read (Sign or House placements only) */
+const R_curSel={sign:-1,house:-1}, R_detailReady={sign:-1,house:-1}; let R_stoneSeen={}, R_stoneObs=null;
+function R_stonesArm(){ const box=R_$('R-stones'); if(!box || box.hidden) return; R_stonesUpdate(); }
+function R_stonesUpdate(){
+  const box=R_$('R-stones'); if(!box || !R_panels.length) return;
+  const name=(R_panels[R_idx]||{}).dataset ? R_panels[R_idx].dataset.name : "";
+  const kind = name==="Sign Placements" ? "sign" : (name==="House Placements" ? "house" : null);
+  const pk = kind ? R_pick[R_curSel[kind]] : null;
+  const items = pk ? (kind==="sign" ? cmLookupSign(pk.planet,pk.sign) : cmLookupHouse(pk.planet,pk.house)) : [];
+  if(!items.length){ box.hidden=true; box.innerHTML=""; box.classList.remove('in'); return; }
+  const label = kind==="sign" ? (pk.planet+" in "+pk.sign) : (pk.planet+" in the "+R_ord(pk.house)+" House");      // tracking value, same as before
+  const shown = kind==="sign" ? (R_name(pk.planet)+" in "+pk.sign) : (R_name(pk.planet)+" in the "+R_ord(pk.house)+" House");
+  box.dataset.key=kind+"|"+R_curSel[kind]; box.dataset.label=label; box.dataset.n=items.length;
+  box.dataset.ready = (R_detailReady[kind]===R_curSel[kind]) ? "1" : "0";
+  box.innerHTML=`<div class="sr-txt"><div class="sr-h">Stones for ${R_esc(shown)}</div><div class="sr-sub">Traditionally associated — offered for reflection.</div></div>`+
+    `<div class="sr-list">${items.map(x=>`<a class="sr-item" href="${x.url}" target="_blank" rel="noopener" data-stone="${R_esc(x.en)}">${R_esc(x.en)}<span class="sr-arw">→</span></a>`).join("")}</div>`;
+  box.querySelectorAll('.sr-item').forEach(a=>a.addEventListener('click',()=>zTrack("crystal_click",{stone:a.dataset.stone,placement:label,kind:"placement",choices:items.length})));
+  box.hidden=false; box.classList.remove('in');
+  if(!R_stoneObs && 'IntersectionObserver' in window){
+    R_stoneObs=new IntersectionObserver(es=>es.forEach(e=>{
+      if(!e.isIntersecting || e.target.hidden || e.target.dataset.ready!=="1") return;
+      e.target.classList.add('in');
+      const k=e.target.dataset.key, n=+e.target.dataset.n;
+      if(n>1 && !R_stoneSeen[k]){ R_stoneSeen[k]=1; zTrack("crystal_choice_open",{placement:e.target.dataset.label,kind:"placement",choices:n}); }
+    }), {threshold:0.5});
+  }
+  if(R_stoneObs){ R_stoneObs.unobserve(box); R_stoneObs.observe(box); } else box.classList.add('in');
+}
 function R_settleReading(){ const rd=R_$('reading'); if(rd) rd.classList.remove('result-appear'); }
 document.addEventListener('animationend', e=>{ if(e.target && e.target.id==='reading' && e.animationName==='resultAppear') R_settleReading(); });
 function R_openIntro(){
@@ -2622,6 +2702,7 @@ function R_select(pickerId,detailId,kind,i){
     + (g?`<span class="detail-sub" hidden>${g}</span>`:'')
     + `</div>` + kw;
   const cta = R_placeCTA(kind, i);
+  R_curSel[kind]=i; R_detailReady[kind]=-1; R_stonesUpdate();
   const token=++R_selToken[detailId];
   const path = kind==='sign' ? '/sign-report' : '/house-report';
   const retry=`R_select('${pickerId}','${detailId}','${kind}',${i})`;
@@ -2641,7 +2722,8 @@ function R_select(pickerId,detailId,kind,i){
         ).join("")+cta;
         R_animDetailBody(bodyEl);
       } else { bodyEl.innerHTML=R_rawBox(d,retry)+cta; }
-    }).catch(e=>{ if(R_selToken[detailId]===token){ const b=el.querySelector('.d-body'); if(b) b.innerHTML=R_errBox(e,retry)+cta; } });
+      R_detailReady[kind]=i; R_stonesArm();
+    }).catch(e=>{ if(R_selToken[detailId]===token){ const b=el.querySelector('.d-body'); if(b) b.innerHTML=R_errBox(e,retry)+cta; R_detailReady[kind]=i; R_stonesArm(); } });
   };
 
   // 渐隐旧内容 → 渐显新内容;首次(无内容)直接渐显
@@ -2660,7 +2742,7 @@ function R_animDetailBody(host){
   if(cta){ cta.style.opacity='0'; cta.style.transition='opacity .9s ease'; setTimeout(()=>{ cta.style.opacity='1'; }, Math.round((base+secs.length*STEP)*1000)); }
 }
 /* product-page link: match this placement to crystal product page(s); hide the button if no match */
-function R_placeCTA(kind, i){
+function R_placeCTA(kind, i){ return "";   /* the stones now appear in their own row under the email */
   const p=R_pick[i]; if(!p) return "";
   const items = kind==='sign' ? cmLookupSign(p.planet,p.sign) : cmLookupHouse(p.planet,p.house);
   if(!items.length) return "";
