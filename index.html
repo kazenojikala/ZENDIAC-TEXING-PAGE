@@ -992,6 +992,22 @@ body.has-stepper #reading .big3-note{margin:-14px auto 26px}
 .cz-hint{display:none}
 
 #reading .detail-head + .d-body > .acc:first-child{border-top:none}
+#reading .sec-jump{order:-1;width:100%;max-width:440px;margin:0 auto}
+#reading .sec-jump[hidden]{display:none}
+#reading .sj-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:50px;padding:15px 16px;background:transparent;
+  border:1px solid var(--line);cursor:pointer;font-family:var(--sans);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--label);
+  transition:border-color .25s,color .25s}
+#reading .sj-btn:hover,#reading .sec-jump.open .sj-btn{border-color:var(--gold-deep);color:var(--ink)}
+#reading .sj-caret{width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);margin-top:-4px;transition:transform .3s}
+#reading .sec-jump.open .sj-caret{transform:rotate(-135deg);margin-top:3px}
+#reading .sj-wrap{display:grid;grid-template-rows:0fr;opacity:0;visibility:hidden;transition:grid-template-rows .45s ease,opacity .35s ease,visibility 0s linear .45s}
+#reading .sec-jump.open .sj-wrap{grid-template-rows:1fr;opacity:1;visibility:visible;transition:grid-template-rows .45s ease,opacity .5s ease .05s,visibility 0s}
+#reading .sj-list{overflow:hidden;min-height:0;border:1px solid var(--line-soft);border-top:none;background:#090909}
+#reading .sj-item{display:flex;align-items:baseline;justify-content:center;gap:14px;width:100%;min-height:48px;padding:13px 16px;background:none;border:none;
+  border-top:1px solid var(--line-faint);cursor:pointer;font-family:var(--serif);font-size:18px;color:var(--body);transition:color .25s,background .25s}
+#reading .sj-item:first-child{border-top:none}
+#reading .sj-item:hover{color:var(--ink);background:rgba(212,175,55,.04)}
+#reading .sj-n{font-family:var(--sans);font-size:10.5px;letter-spacing:.14em;color:var(--gold-deep)}
 #reading .stones-row{display:flex;align-items:center;justify-content:space-between;gap:16px 32px;flex-wrap:wrap;margin:64px 0 0;
   opacity:0;transform:translateY(14px);transition:opacity 1s ease,transform 1s ease}
 #reading .stones-row.in{opacity:1;transform:none}
@@ -1216,6 +1232,10 @@ body.has-stepper #reading .big3-note{margin:-14px auto 26px}
       <div id="R-email-msg" class="ec-msg"></div>
     </div>
     <button class="sec-next" id="R-secNext" type="button" onclick="R_stepGo(1)"><span class="sn-k">Next:</span><span class="sn-t" id="R-secNextT"></span><span class="pn-arrow">›</span></button>
+    <div class="sec-jump" id="R-secJump" hidden>
+      <button type="button" class="sj-btn" aria-expanded="false" aria-controls="R-sjList" onclick="R_jumpToggle(event)"><span>Revisit a section</span><span class="sj-caret"></span></button>
+      <div class="sj-wrap"><div class="sj-list" id="R-sjList"></div></div>
+    </div>
   </div>
   <div class="stones-row" id="R-stones" hidden></div>
   </div><!-- /below -->
@@ -2395,6 +2415,11 @@ function R_updateStepper(){
   const st=R_$('R-navStep'); if(st) st.textContent="Section "+(i+1)+" of "+n;
   const c=R_$('R-stCount'); if(c) c.innerHTML=(i+1)+" / "+n+'<span class="st-name">  ·  '+R_esc(R_panels[i].dataset.name||"")+'</span>';
   const pv=R_$('R-stPrev'); if(pv) pv.classList.toggle('st-hide', i===0);
+  const sj=R_$('R-secJump');
+  if(sj){
+    const end=(i>=n-1); sj.hidden=!end; sj.classList.remove('open'); sj.querySelector('.sj-btn').setAttribute('aria-expanded','false');
+    if(end) R_$('R-sjList').innerHTML=R_panels.slice(0,n-1).map((p,k)=>`<button type="button" class="sj-item" onclick="R_jumpGo(${k})"><span class="sj-n">${String(k+1).padStart(2,"0")}</span><span>${R_esc(p.dataset.name||"")}</span></button>`).join("");
+  }
   const sn=R_$('R-secNext'); if(sn){ const end=(i>=n-1); sn.style.display=end?'none':''; if(!end) R_$('R-secNextT').textContent=R_NEXT[R_panels[i+1].dataset.name]||R_panels[i+1].dataset.name||""; }
   const nx=R_$('R-stNext'); if(nx){ const last=(i>=n-1); nx.classList.toggle('st-hide', last); nx.textContent= last ? "" : ((R_panels[i+1].dataset.name||"Next")+" ›"); }
   const bar=R_$('R-stepper'); if(bar) bar.style.setProperty('--st-p', Math.round((i+1)/n*100)+'%');
@@ -2629,6 +2654,20 @@ function R_stonesUpdate(){
   }
   if(R_stoneObs){ R_stoneObs.unobserve(box); R_stoneObs.observe(box); } else box.classList.add('in');
 }
+function R_jumpToggle(e){
+  if(e) e.stopPropagation();
+  const w=R_$('R-secJump'); if(!w) return;
+  const open=!w.classList.contains('open'); w.classList.toggle('open',open); w.querySelector('.sj-btn').setAttribute('aria-expanded',open?'true':'false');
+  if(open) setTimeout(()=>{                                   // keep the whole list on screen, clear of the bottom bar
+    const r=w.getBoundingClientRect(), limit=window.innerHeight-64;
+    if(r.bottom>limit) window.scrollBy({top:r.bottom-limit, behavior:'smooth'});
+  }, 470);
+}
+function R_jumpGo(k){
+  const w=R_$('R-secJump'); if(w) w.classList.remove('open');
+  R_accHold=Date.now()+1500; R_showPanel(k); R_scrollNav();
+}
+document.addEventListener('click', e=>{ const w=R_$('R-secJump'); if(w && w.classList.contains('open') && !w.contains(e.target)){ w.classList.remove('open'); w.querySelector('.sj-btn').setAttribute('aria-expanded','false'); } });
 function R_settleReading(){ const rd=R_$('reading'); if(rd) rd.classList.remove('result-appear'); }
 document.addEventListener('animationend', e=>{ if(e.target && e.target.id==='reading' && e.animationName==='resultAppear') R_settleReading(); });
 function R_openIntro(){
